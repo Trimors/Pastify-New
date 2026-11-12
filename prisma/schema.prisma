@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum Visibility {
+  PUBLIC
+  UNLISTED
+  PRIVATE
+}
+
+enum ContentStatus {
+  ACTIVE
+  REMOVED
+}
+
+enum ResourceKind {
+  PASTE
+  LOCKER
+}
+
+enum LedgerType {
+  EARNING
+  REFERRAL
+  PAYOUT
+  PAYOUT_REVERSAL
+  ADJUSTMENT
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+  REJECTED
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model User {
+  id                String        @id @default(cuid())
+  email             String        @unique
+  username          String        @unique
+  displayName       String?
+  bio               String?
+  passwordHash      String
+  role              Role          @default(USER)
+  status            AccountStatus @default(ACTIVE)
+  totpSecret        String?
+  totpEnabled       Boolean       @default(false)
+  referralCode      String        @unique
+  referredById      String?
+  referredBy        User?         @relation("Referrals", fields: [referredById], references: [id])
+  referrals         User[]        @relation("Referrals")
+  payoutMethod      String?
+  payoutDestination String?
+  emailOnPayout     Boolean       @default(true)
+  emailOnReport     Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  sessions Session[]
+  apiKeys  ApiKey[]
+  pastes   Paste[]
+  folders  Folder[]
+  lockers  Locker[]
+  ledger   LedgerEntry[]
+  payouts  Payout[]
+}
+
+model Session {
+  id        String   @id // sha256 of the cookie token
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  prefix     String
+  keyHash    String    @unique
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime @default(now())
+  pastes    Paste[]
+
+  @@unique([userId, name])
+}
+
+model Paste {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId      String?
+  folder        Folder?       @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  title         String
+  filename      String?
+  language      String        @default("text")
+  content       String
+  description   String?
+  tags          String[]
+  visibility    Visibility    @default(PUBLIC)
+  earning       Boolean       @default(false)
+  passwordHash  String?
+  burnAfterRead Boolean       @default(false)
+  expiresAt     DateTime?
+  status        ContentStatus @default(ACTIVE)
+  lineCount     Int           @default(0)
+  sizeBytes     Int           @default(0)
+  views         Int           @default(0)
+  unlocks       Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([visibility, status, createdAt])
+}
+
+model Locker {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  targetUrl    String
+  // "light" = 1 step, "standard" = 2 steps, "heavy" = 3 steps
+  intensity    String        @default("standard")
+  waitSeconds  Int           @default(0)
+  status       ContentStatus @default(ACTIVE)
+  views        Int           @default(0)
+  unlocks      Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model ViewEvent {
+  id             String       @id @default(cuid())
+  kind           ResourceKind
+  resourceId     String
+  ownerId        String?
+  visitorHash    String
+  country        String       @default("XX")
+  device         String       @default("desktop")
+  browser        String       @default("other")
+  source         String       @default("direct")
+  referrerDomain String?
+  unlocked       Boolean      @default(false)
+  earningMicros  BigInt       @default(0)
+  createdAt      DateTime     @default(now())
+  unlockedAt     DateTime?
+
+  @@index([ownerId, createdAt])
+  @@index([resourceId, visitorHash, createdAt])
+}
+
+model UnlockSession {
+  id          String       @id @default(cuid())
+  kind        ResourceKind
+  resourceId  String
+  viewEventId String?
+  visitorHash String
+  // JSON array of { kind, seconds }
+  steps       Json
+  stepIndex   Int          @default(0)
+  stepStarted DateTime     @default(now())
+  powSalt     String
+  powBits     Int
+  powSolved   Boolean      @default(false)
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+
+  @@index([visitorHash, createdAt])
+}
+
+model LedgerEntry {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         LedgerType
+  amountMicros BigInt
+  refId        String?
+  note         String?
+  createdAt    DateTime   @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Payout {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amountMicros BigInt
+  method       String
+  destination  String
+  status       PayoutStatus @default(PENDING)
+  note         String?
+  createdAt    DateTime     @default(now())
+  processedAt  DateTime?
+
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+model Report {
+  id            String       @id @default(cuid())
+  kind          ResourceKind
+  slug          String
+  reason        String
+  details       String?
+  reporterEmail String?
+  status        ReportStatus @default(OPEN)
+  createdAt     DateTime     @default(now())
+
+  @@index([status, createdAt])
+}
+
+model RateLimit {
+  key       String   @id
+  count     Int
+  resetAt   DateTime
+}
