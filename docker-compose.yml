@@ -1,0 +1,38 @@
+# 1. Put AUTH_SECRET, ADMIN_EMAIL, NEXT_PUBLIC_SITE_URL (and the rest of .env.example) in .env
+# 2. docker compose up -d --build
+# 3. Sign up on the site with ADMIN_EMAIL: that account gets the admin role automatically.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pastify
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: pastify
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+        NEXT_PUBLIC_AD_SCRIPT_URL: ${NEXT_PUBLIC_AD_SCRIPT_URL:-}
+    restart: unless-stopped
+    depends_on: [db]
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://pastify:${POSTGRES_PASSWORD:-change-me}@db:5432/pastify?schema=public
+      AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}
+      CRON_SECRET: ${CRON_SECRET:-}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      SPONSOR_URL: ${SPONSOR_URL:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+      IP_HEADER: ${IP_HEADER:-x-forwarded-for}
+      GEO_HEADER: ${GEO_HEADER:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+
+volumes:
+  pgdata:

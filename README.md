@@ -100,6 +100,16 @@ Open http://localhost:3000.
 4. Deploy. The build runs database migrations automatically.
 5. Create your admin: run the seed command once against the production database.
 
+### Self-host with Docker
+
+Put your settings in `.env`, then:
+
+```bash
+docker compose up -d --build
+```
+
+Sign up with the address in `ADMIN_EMAIL` and that account becomes admin. Put a reverse proxy (Caddy, nginx or Cloudflare) in front for HTTPS.
+
 Behind Cloudflare instead, use `IP_HEADER=cf-connecting-ip` and `GEO_HEADER=cf-ipcountry`.
 
 **Important:** `GEO_HEADER` must be a header your host sets and visitors can't. If it's unset, every visitor is paid at the "rest of world" rate.
