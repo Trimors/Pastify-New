@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "tsc --noEmit",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "build:local": "prisma generate && next build",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
@@ -35,5 +37,8 @@
     "tailwindcss": "4.3.5",
     "tsx": "4.20.5",
     "typescript": "5.9.2"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

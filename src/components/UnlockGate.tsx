@@ -136,7 +136,9 @@ export function UnlockGate({ kind, slug, onDoneHref }: { kind: "paste" | "locker
         setError(
           data.error === "captcha_failed"
             ? "Complete the check above first."
-            : data.error === "expired"
+            : data.error === "blocked"
+              ? "Automated browsers can't unlock. Open this link in a normal browser."
+              : data.error === "expired"
               ? "This unlock timed out. Reload the page."
               : "That didn't go through. Reload and try again.",
         );

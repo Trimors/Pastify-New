@@ -209,6 +209,7 @@ select.input {
   from { transform: translateY(-30%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+.mark-animate .mark-top, .mark-animate .mark-stem { transform-box: fill-box; }
 .mark-animate .mark-top { animation: sheet-drop 700ms ease-out both; }
 .mark-animate .mark-stem { animation: stem-land 550ms ease-out 350ms both; }
 

@@ -17,14 +17,17 @@ export async function verifyPassword(pw: string, hash: string) {
   return bcrypt.compare(pw, hash);
 }
 
+/**
+ * Client IP from the one header your proxy sets (IP_HEADER). For x-forwarded-for we take the
+ * last hop, which the nearest proxy appended and the visitor can't forge.
+ */
 export async function clientIp() {
   const h = await headers();
-  return (
-    h.get("cf-connecting-ip") ||
-    h.get("x-real-ip") ||
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    "0.0.0.0"
-  );
+  const name = (process.env.IP_HEADER || "x-forwarded-for").toLowerCase();
+  const v = h.get(name);
+  if (!v) return "0.0.0.0";
+  if (name === "x-forwarded-for") return v.split(",").map((s) => s.trim()).filter(Boolean).pop() || "0.0.0.0";
+  return v.trim();
 }
 
 export async function createSession(userId: string) {
