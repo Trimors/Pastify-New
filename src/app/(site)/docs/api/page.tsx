@@ -46,6 +46,15 @@ const endpoints: { m: string; p: string; d: string; body?: string; res?: string 
   { m: "GET", p: "/api/v1/lockers/{slug}", d: "One locker." },
   { m: "PATCH", p: "/api/v1/lockers/{slug}", d: "Change title, target, description, intensity or waitSeconds." },
   { m: "DELETE", p: "/api/v1/lockers/{slug}", d: "Delete a locker." },
+  {
+    m: "POST",
+    p: "/api/v1/lockers/{slug}/targets",
+    d: "One locker, many destinations. Adds a destination and returns its own share link. Views and earnings stay on the locker.",
+    body: `{ "target": "https://example.com/file-42", "label": "File 42" }`,
+    res: `{ "data": { "code": "Hk3mQx7a", "url": "${B}/l/Ab3k9P?d=Hk3mQx7a", ... } }`,
+  },
+  { m: "GET", p: "/api/v1/lockers/{slug}/targets", d: "List a locker's destinations." },
+  { m: "DELETE", p: "/api/v1/lockers/{slug}/targets/{code}", d: "Remove a destination." },
 ];
 
 export default function ApiDocs() {

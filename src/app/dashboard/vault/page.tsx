@@ -75,6 +75,7 @@ export default async function VaultPage({ searchParams }: { searchParams: SP }) 
         <td className="py-3 pl-3 pr-4">
           <div className="flex justify-end gap-1">
             <CopyButton text={`${SITE_URL}/${p.slug}`} label="Copy" className="btn btn-ghost btn-sm" />
+            <Link href={`/dashboard/stats/${p.id}`} className="btn btn-ghost btn-sm">Stats</Link>
             <Link href={`/dashboard/pastes/${p.id}`} className="btn btn-ghost btn-sm">Edit</Link>
             <DeleteButton onDelete={deleteItem.bind(null, "paste", p.id)} />
           </div>
@@ -103,6 +104,7 @@ export default async function VaultPage({ searchParams }: { searchParams: SP }) 
         <td className="py-3 pl-3 pr-4">
           <div className="flex justify-end gap-1">
             <CopyButton text={`${SITE_URL}/l/${l.slug}`} label="Copy" className="btn btn-ghost btn-sm" />
+            <Link href={`/dashboard/stats/${l.id}`} className="btn btn-ghost btn-sm">Stats</Link>
             <Link href={`/dashboard/lockers/${l.id}`} className="btn btn-ghost btn-sm">Edit</Link>
             <DeleteButton onDelete={deleteItem.bind(null, "locker", l.id)} />
           </div>
@@ -145,7 +147,7 @@ export default async function VaultPage({ searchParams }: { searchParams: SP }) 
                     <span className="font-mono text-xs text-rose">#{i + 1}</span>
                     <span className="chip">{t.kind === "PASTE" ? "Paste" : "Locker"}</span>
                   </div>
-                  <Link href={it?.href ?? "#"} className="mt-2 block truncate font-semibold hover:text-rose">{it?.t ?? "Deleted item"}</Link>
+                  <Link href={`/dashboard/stats/${t.id}`} className="mt-2 block truncate font-semibold hover:text-rose">{it?.t ?? "Deleted item"}</Link>
                   <div className="mt-3 grid grid-cols-3 gap-2 font-mono text-sm">
                     <span><span className="block text-[10px] uppercase tracking-wider text-muted">Views</span>{compact(t.views)}</span>
                     <span><span className="block text-[10px] uppercase tracking-wider text-muted">Unlocks</span>{compact(t.unlocks)}</span>

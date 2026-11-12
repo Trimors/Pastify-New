@@ -19,6 +19,7 @@ Engineered by Trimors Technologies.
 **Link lockers**
 - Title + target link, Light / Standard / Heavy step sets, optional extra wait
 - Bulk create from CSV (up to 200 lines)
+- **Extra destinations**: one locker, many links (`/l/{slug}?d={code}`), managed in the dashboard or the API
 - The target address is never sent to the browser until the visitor has unlocked
 
 **Unlock flow and anti-fraud**
@@ -34,6 +35,7 @@ Engineered by Trimors Technologies.
 - Overview: balance, views, unlocks, earnings, unlock rate, CPM, earnings per view
 - Chart for today (hourly), 7 / 28 / 90 days and all time; switch between views, unlocks and earnings
 - Breakdowns: top content, countries, sources (direct / links / search / social), referring sites, devices, browsers
+- Per-item analytics page for every paste and locker
 - Vault: best performing (by views, unlocks or earnings), searchable / sortable / paged table with 14-day sparklines, folder filter
 - Earnings: available, in progress, paid out, lifetime; cashout requests; payout method (PayPal, USDT TRC-20, Bitcoin, Litecoin); daily activity log
 - Referrals: custom link `/r/yourcode`, 5% commission paid by Pastify, referred-user table
@@ -52,7 +54,7 @@ Engineered by Trimors Technologies.
 - Users: search, suspend / restore, balance adjustments
 - Content: search and remove / restore any paste or locker
 
-**REST API** (`/api/v1`, bearer key, 120 requests/minute): `me`, `stats`, and full create / read / update / delete for pastes and lockers. Docs at `/docs/api`.
+**REST API** (`/api/v1`, bearer key, 120 requests/minute): `me`, `stats`, and full create / read / update / delete for pastes and lockers, plus locker destinations. Docs at `/docs/api`.
 
 ## Run it locally
 
@@ -117,9 +119,8 @@ Also review:
 
 - **Visitor Premium** (visitors pay to skip steps, creators get a revenue share): needs a Stripe or PayPal account
 - **Emails** (welcome, payout paid/rejected, content removed): needs an email provider such as Resend or Postmark
-- **One locker, many destinations** (like Lockr's "Magic API")
 - Automatic payouts through the PayPal Payouts API or a crypto payout provider
-- World map on the dashboard, per-item analytics page
+- World map on the dashboard
 - Custom domains for creators' links
 - Identity checks (KYC) before large payouts
 

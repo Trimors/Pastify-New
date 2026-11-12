@@ -19,8 +19,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: l.title, description: l.description || "Unlock this link on Pastify.", robots: { index: false } };
 }
 
-export default async function LockerPage({ params }: Props) {
+export default async function LockerPage({ params, searchParams }: Props & { searchParams: Promise<{ d?: string }> }) {
   const { slug } = await params;
+  const { d } = await searchParams;
+  const dest = d && /^[A-Za-z0-9]{4,16}$/.test(d) ? d : null;
   const l = await load(slug);
   if (!l) notFound();
   const user = await getUser();
@@ -33,9 +35,10 @@ export default async function LockerPage({ params }: Props) {
       </div>
     );
   }
+  const alt = dest ? await db.lockerTarget.findFirst({ where: { code: dest, lockerId: l.id }, select: { url: true } }) : null;
   let host = "";
   try {
-    host = new URL(l.targetUrl).hostname;
+    host = new URL(alt?.url ?? l.targetUrl).hostname;
   } catch {}
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
@@ -58,7 +61,7 @@ export default async function LockerPage({ params }: Props) {
           </div>
         </div>
       ) : (
-        <UnlockGate kind="locker" slug={l.slug} onDoneHref={`/l/${l.slug}/go`} />
+        <UnlockGate kind="locker" slug={l.slug} onDoneHref={`/l/${l.slug}/go${dest ? `?d=${dest}` : ""}`} />
       )}
       <p className="mt-6 text-center text-xs text-muted">
         <Link href={`/report?slug=${l.slug}&kind=locker`} className="hover:text-paper">Report this link</Link>

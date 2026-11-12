@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { createLocker, updateLocker } from "@/lib/lockers";
+import { addLockerTarget, createLocker, updateLocker } from "@/lib/lockers";
 import { rateLimit } from "@/lib/ratelimit";
 
 function msg(e: unknown) {
@@ -68,4 +68,21 @@ export async function updateLockerAction(id: string, _: { error?: string; ok?: b
   }
   revalidatePath(`/dashboard/lockers/${id}`);
   return { ok: true };
+}
+
+export async function addTargetAction(lockerId: string, _: { error?: string; ok?: string } | undefined, form: FormData) {
+  const user = await requireUser();
+  try {
+    await addLockerTarget(lockerId, user.id, { url: form.get("url"), label: form.get("label") });
+  } catch (e) {
+    return { error: msg(e) };
+  }
+  revalidatePath(`/dashboard/lockers/${lockerId}`);
+  return { ok: "Destination added." };
+}
+
+export async function deleteTargetAction(lockerId: string, id: string) {
+  const user = await requireUser();
+  await db.lockerTarget.deleteMany({ where: { id, locker: { id: lockerId, userId: user.id } } });
+  revalidatePath(`/dashboard/lockers/${lockerId}`);
 }

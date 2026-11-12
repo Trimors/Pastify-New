@@ -51,3 +51,24 @@ export function publicLocker(l: { slug: string; title: string; targetUrl: string
     createdAt: l.createdAt.toISOString(),
   };
 }
+
+const targetUrl = z.string().trim().max(2048).url("Enter a full link starting with https://").refine((u) => /^https?:\/\//i.test(u), "Only http and https links are allowed.");
+
+/** Adds a destination to a locker. Visitors use /l/{slug}?d={code}. */
+export async function addLockerTarget(lockerId: string, userId: string, raw: { url?: unknown; label?: unknown }) {
+  const locker = await db.locker.findFirst({ where: { id: lockerId, userId }, select: { id: true, _count: { select: { targets: true } } } });
+  if (!locker) throw new Error("Locker not found.");
+  if (locker._count.targets >= 1000) throw new Error("Up to 1,000 destinations per locker.");
+  const url = targetUrl.parse(raw.url);
+  const label = typeof raw.label === "string" ? raw.label.trim().slice(0, 80) || null : null;
+  const { shortId } = await import("./ids");
+  for (let i = 0; i < 5; i++) {
+    const code = shortId() + shortId().slice(0, 2);
+    try {
+      return await db.lockerTarget.create({ data: { code, lockerId, url, label } });
+    } catch {
+      // code collision, try again
+    }
+  }
+  throw new Error("Could not create a destination code. Try again.");
+}
