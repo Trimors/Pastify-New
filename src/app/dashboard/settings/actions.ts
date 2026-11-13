@@ -76,3 +76,12 @@ export async function deleteAccount(_: S, form: FormData): Promise<S> {
   await db.user.delete({ where: { id: user.id } });
   redirect("/");
 }
+
+export async function openPremiumPortal() {
+  const user = await requireUser();
+  const sub = await db.subscription.findFirst({ where: { userId: user.id, paddleCustomerId: { not: null } }, orderBy: { updatedAt: "desc" } });
+  if (!sub?.paddleCustomerId) redirect("/dashboard/settings?portal=none#premium");
+  const { portalUrl } = await import("@/lib/premium");
+  const url = await portalUrl(sub.paddleCustomerId, sub.id);
+  redirect(url ?? "/dashboard/settings?portal=error#premium");
+}

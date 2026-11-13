@@ -9,14 +9,14 @@ import { cashout, savePayoutMethod } from "./actions";
 
 export const metadata = { title: "Earnings" };
 
-const TYPE_LABEL = { EARNING: "Unlock earnings", REFERRAL: "Referral commission", PAYOUT: "Cashout", PAYOUT_REVERSAL: "Cashout returned", ADJUSTMENT: "Adjustment" } as const;
+const TYPE_LABEL = { EARNING: "Unlock earnings", REFERRAL: "Referral commission", PAYOUT: "Cashout", PAYOUT_REVERSAL: "Cashout returned", ADJUSTMENT: "Adjustment", PREMIUM_SALE: "Premium sales", PREMIUM_REFUND: "Premium refunds" } as const;
 
 export default async function EarningsPage() {
   const user = await requireUser();
   const [balance, payouts, lifetime, paid, ledger] = await Promise.all([
     balanceOf(user.id),
     db.payout.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 50 }),
-    db.ledgerEntry.aggregate({ where: { userId: user.id, type: { in: ["EARNING", "REFERRAL", "ADJUSTMENT"] } }, _sum: { amountMicros: true } }),
+    db.ledgerEntry.aggregate({ where: { userId: user.id, type: { in: ["EARNING", "REFERRAL", "ADJUSTMENT", "PREMIUM_SALE", "PREMIUM_REFUND"] } }, _sum: { amountMicros: true } }),
     db.payout.aggregate({ where: { userId: user.id, status: "PAID" }, _sum: { amountMicros: true } }),
     // Daily roll-up of earnings so the ledger stays readable at high volume.
     db.$queryRaw<{ d: Date; type: string; amount: bigint; n: bigint }[]>`

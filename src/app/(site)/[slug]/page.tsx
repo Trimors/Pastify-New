@@ -8,6 +8,7 @@ import { hasGrant } from "@/lib/grant";
 import { highlight } from "@/lib/highlight";
 import { richToText, sanitizeRich } from "@/lib/rich";
 import { isExpired } from "@/lib/pastes";
+import { isPremium, paddleReady } from "@/lib/premium";
 import { languageLabel } from "@/lib/languages";
 import { SITE_HOST, SITE_URL } from "@/lib/config";
 import { bytes, compact, relTime, shortDate, timeLeft } from "@/lib/format";
@@ -56,7 +57,8 @@ export default async function PastePage({ params, searchParams }: Props) {
   }
 
   const needsPassword = !!p.passwordHash && !isOwner && !(await hasGrant("pw", p.id));
-  const needsUnlock = p.earning && !isOwner && !isAdmin && !(await hasGrant("u", p.id));
+  const premium = isPremium(user);
+  const needsUnlock = p.earning && !isOwner && !isAdmin && !premium && !(await hasGrant("u", p.id));
   const burnGate = p.burnAfterRead && !isOwner;
   const showContent = !needsPassword && !needsUnlock && !burnGate;
   const rich = p.format === "rich";
@@ -138,7 +140,7 @@ export default async function PastePage({ params, searchParams }: Props) {
       {needsPassword ? (
         <PasswordGate slug={p.slug} />
       ) : needsUnlock ? (
-        <UnlockGate kind="paste" slug={p.slug} />
+        <UnlockGate kind="paste" slug={p.slug} premiumHref={paddleReady() ? `/premium?via=paste:${p.slug}` : undefined} />
       ) : burnGate ? (
         <BurnGate slug={p.slug} />
       ) : rich ? (
@@ -152,7 +154,7 @@ export default async function PastePage({ params, searchParams }: Props) {
         <PasteShortcuts url={url} copyText={showContent ? plain : null} editHref={isOwner ? `/dashboard/pastes/${p.id}` : canEditWithCode ? `/${p.slug}/edit` : null} rawHref={showContent ? `/${p.slug}/raw` : null} title={p.title} />
       </div>
 
-      {showContent && !p.earning && !isOwner && <ViewBeacon slug={p.slug} />}
+      {showContent && (!p.earning || premium) && !isOwner && <ViewBeacon slug={p.slug} />}
 
       {!isOwner && (
         <p className="mt-6 text-right text-xs text-muted">

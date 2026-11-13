@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getUser } from "@/lib/auth";
 import { hasGrant } from "@/lib/grant";
+import { isPremium } from "@/lib/premium";
 
 /**
  * Sends unlocked visitors to the target. The target URL is never sent to a browser without a grant.
@@ -14,7 +15,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const l = await db.locker.findUnique({ where: { slug } });
   if (!l || l.status !== "ACTIVE") return NextResponse.redirect(back);
   const user = await getUser();
-  if (user?.id !== l.userId && !(await hasGrant("u", l.id))) return NextResponse.redirect(back);
+  if (user?.id !== l.userId && !isPremium(user) && !(await hasGrant("u", l.id))) return NextResponse.redirect(back);
   let target = l.targetUrl;
   if (d) {
     const t = await db.lockerTarget.findFirst({ where: { code: d, lockerId: l.id }, select: { url: true } });

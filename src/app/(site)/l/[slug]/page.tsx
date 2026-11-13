@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getUser } from "@/lib/auth";
+import { isPremium, paddleReady } from "@/lib/premium";
 import { SITE_URL } from "@/lib/config";
 import { UnlockGate } from "@/components/UnlockGate";
 import { CopyButton } from "@/components/CopyButton";
@@ -61,7 +62,14 @@ export default async function LockerPage({ params, searchParams }: Props & { sea
           </div>
         </div>
       ) : (
-        <UnlockGate kind="locker" slug={l.slug} onDoneHref={`/l/${l.slug}/go${dest ? `?d=${dest}` : ""}`} />
+        isPremium(user) ? (
+          <div className="card space-y-4 p-6 text-center">
+            <p className="font-semibold">Premium: no steps needed</p>
+            <a href={`/l/${l.slug}/go${dest ? `?d=${dest}` : ""}`} className="btn btn-primary w-full">Open link</a>
+          </div>
+        ) : (
+          <UnlockGate kind="locker" slug={l.slug} onDoneHref={`/l/${l.slug}/go${dest ? `?d=${dest}` : ""}`} premiumHref={paddleReady() ? `/premium?via=locker:${l.slug}` : undefined} />
+        )
       )}
       <p className="mt-6 text-center text-xs text-muted">
         <Link href={`/report?slug=${l.slug}&kind=locker`} className="hover:text-paper">Report this link</Link>

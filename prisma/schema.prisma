@@ -39,6 +39,8 @@ enum LedgerType {
   PAYOUT
   PAYOUT_REVERSAL
   ADJUSTMENT
+  PREMIUM_SALE
+  PREMIUM_REFUND
 }
 
 enum PayoutStatus {
@@ -70,6 +72,8 @@ model User {
   referrals         User[]        @relation("Referrals")
   payoutMethod      String?
   payoutDestination String?
+  /// Visitor Premium: skips unlock steps and ads until this time.
+  premiumUntil      DateTime?
   emailOnPayout     Boolean       @default(true)
   emailOnReport     Boolean       @default(true)
   createdAt         DateTime      @default(now())
@@ -80,6 +84,7 @@ model User {
   pastes   Paste[]
   folders  Folder[]
   templates Template[]
+  subscriptions Subscription[] @relation("SubscriptionBuyer")
   lockers  Locker[]
   ledger   LedgerEntry[]
   payouts  Payout[]
@@ -287,4 +292,49 @@ model Template {
   updatedAt DateTime @updatedAt
 
   @@index([userId, updatedAt])
+}
+
+/// A Paddle subscription for visitor Premium.
+model Subscription {
+  id               String    @id // Paddle subscription id (sub_…)
+  userId           String
+  user             User      @relation("SubscriptionBuyer", fields: [userId], references: [id], onDelete: Cascade)
+  /// Creator credited for this subscription's sales and renewals (null = no creator).
+  creatorId        String?
+  paddleCustomerId String?
+  plan             String
+  status           String
+  currentPeriodEnd DateTime?
+  cancelAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([creatorId])
+}
+
+/// One paid Premium transaction (first payment or renewal) and the creator's share of it.
+model PremiumSale {
+  id              String   @id // Paddle transaction id (txn_…)
+  subscriptionId  String?
+  buyerId         String?
+  creatorId       String?
+  plan            String
+  renewal         Boolean  @default(false)
+  currency        String
+  grossCents      Int
+  netCents        Int
+  sharePct        Int
+  shareMicros     BigInt
+  refundedMicros  BigInt   @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([creatorId, createdAt])
+}
+
+/// Paddle webhook ids already processed, so retries are ignored.
+model WebhookEvent {
+  id         String   @id
+  type       String
+  receivedAt DateTime @default(now())
 }

@@ -55,6 +55,15 @@ Engineered by Trimors Technologies.
 - Terms, Privacy, Content policy, Report abuse form
 - `robots.txt` and `sitemap.xml`
 
+**Visitor Premium (Paddle)**
+- `/premium`: 1 month $9.99, 3 months $6.99/mo ($20.97), 12 months $2.99/mo ($35.88). Premium members skip unlock steps and ads
+- Every unlock page has a "get Premium" link that credits the creator; creators also get a `/premium?ref=code` link
+- Creators get **50%** of the net Pastify receives (after tax and Paddle's fee) on each sale and renewal, **70%** from their 6th sale of the UTC day
+- Attribution is signed, so a buyer can't redirect the share to themselves; buyers can't earn on their own purchases
+- Refunds and chargebacks take back the share in proportion; a full refund ends access
+- Webhook (`/api/paddle/webhook`) checks Paddle's signature and ignores repeated events
+- Buyers manage or cancel in Settings (Paddle customer portal); creators see sales, today's rate and their link under Premium sales
+
 **Admin** (`/admin`, for accounts with the ADMIN role)
 - Pending cashouts: mark paid, or reject with a reason (money goes back to the creator's balance)
 - Abuse reports: remove content or dismiss
@@ -121,6 +130,17 @@ Behind Cloudflare instead, use `IP_HEADER=cf-connecting-ip` and `GEO_HEADER=cf-i
 
 **Important:** `GEO_HEADER` must be a header your host sets and visitors can't. If it's unset, every visitor is paid at the "rest of world" rate.
 
+## Set up Paddle (Premium)
+
+1. Create a Paddle account and start in **sandbox**.
+2. Catalog → Products: create "Pastify Premium" with three recurring USD prices: $9.99 every month, $20.97 every 3 months, $35.88 every year. Copy each price id (`pri_…`).
+3. Developer tools → Authentication: create a **client-side token** and an **API key**.
+4. Developer tools → Notifications: add a destination `https://your-domain/api/paddle/webhook` with the events `transaction.completed`, `subscription.created`, `subscription.updated`, `subscription.canceled`, `adjustment.created`, `adjustment.updated`. Copy its secret key.
+5. Put the values in the `PADDLE_*` environment variables (see `.env.example`) and redeploy.
+6. Test with Paddle's sandbox test cards, then switch `NEXT_PUBLIC_PADDLE_ENV` to `production` with live keys.
+
+Until these are set, `/premium` shows the plans with "Coming soon" and unlock pages don't show the Premium link.
+
 ## Business settings to review before launch
 
 All in `src/lib/config.ts`:
@@ -130,11 +150,11 @@ All in `src/lib/config.ts`:
 
 Also review:
 - The legal pages in `src/app/(site)/legal/[page]/page.tsx` are a starting point written for this product. Have them checked by a lawyer for your country before launch.
+- The **refund policy** in the Terms (14 days, written as a placeholder) and Premium wording. Paddle reviews these before approving your account.
 - Payouts are **manual**: admins send the money (PayPal / wallet), then press "Mark paid".
 
 ## Not built yet (next steps)
 
-- **Visitor Premium with pay-per-sale** (visitors pay to skip steps, creators get a share of each sale): planned with **Paddle**
 - **Emails** (welcome, payout paid/rejected, content removed): needs an email provider such as Resend or Postmark
 - Automatic payouts through the PayPal Payouts API or a crypto payout provider
 - World map on the dashboard

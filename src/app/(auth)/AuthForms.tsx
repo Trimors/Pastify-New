@@ -35,10 +35,11 @@ export function LoginForm({ next }: { next?: string }) {
   );
 }
 
-export function SignupForm({ referred }: { referred?: string }) {
+export function SignupForm({ referred, next }: { referred?: string; next?: string }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(signup, undefined);
   return (
     <form action={action} className="space-y-4">
+      <input type="hidden" name="next" value={next ?? ""} />
       {referred && <p className="rounded-lg border border-pink/30 bg-pink/10 px-3 py-2 text-sm text-rose">Invited by {referred}</p>}
       <div>
         <label className="label" htmlFor="email">Email</label>
@@ -62,7 +63,7 @@ export function SignupForm({ referred }: { referred?: string }) {
       {state?.error && <p className="text-sm text-bad">{state.error}</p>}
       <button className="btn btn-primary w-full" disabled={pending}>{pending ? "Creating…" : "Create account"}</button>
       <p className="text-center text-sm text-muted">
-        Have an account? <Link href="/login" className="text-rose hover:underline">Log in</Link>
+        Have an account? <Link href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"} className="text-rose hover:underline">Log in</Link>
       </p>
     </form>
   );

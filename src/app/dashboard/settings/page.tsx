@@ -5,12 +5,17 @@ import { sha256 } from "@/lib/ids";
 import { relTime } from "@/lib/format";
 import { SimpleForm } from "@/components/SimpleForm";
 import { TotpSetup } from "@/components/TotpSetup";
-import { changePassword, confirmTotp, deleteAccount, disableTotp, saveProfile, signOutOthers, startTotp } from "./actions";
+import { changePassword, confirmTotp, deleteAccount, disableTotp, openPremiumPortal, saveProfile, signOutOthers, startTotp } from "./actions";
+import Link from "next/link";
+import { isPremium, PLANS } from "@/lib/premium";
+import { shortDate } from "@/lib/format";
 
 export const metadata = { title: "Settings" };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ portal?: string }> }) {
   const user = await requireUser();
+  const { portal } = await searchParams;
+  const sub = await db.subscription.findFirst({ where: { userId: user.id }, orderBy: { updatedAt: "desc" } });
   const current = sha256((await cookies()).get("pf_session")?.value ?? "");
   const sessions = await db.session.findMany({ where: { userId: user.id, expiresAt: { gt: new Date() } }, orderBy: { createdAt: "desc" } });
   return (
@@ -29,6 +34,31 @@ export default async function SettingsPage() {
           </div>
         </SimpleForm>
       </Section>
+
+      <div id="premium" className="scroll-mt-6">
+        <Section title="Premium" desc="Skip every unlock and see no ads.">
+          {isPremium(user) ? (
+            <div className="space-y-3 text-sm">
+              <p>
+                <span className="text-ok">Active</span>
+                {sub && <> · {PLANS.find((p) => p.id === sub.plan)?.label ?? sub.plan} plan</>} ·{" "}
+                {sub?.cancelAt ? `ends ${shortDate(sub.cancelAt)}` : `${sub?.status === "active" ? "renews" : "until"} ${shortDate(sub?.currentPeriodEnd ?? user.premiumUntil!)}`}
+              </p>
+              {sub?.paddleCustomerId && (
+                <form action={openPremiumPortal}>
+                  <button className="btn btn-secondary btn-sm">Manage or cancel</button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <span className="text-muted">{sub ? `Ended ${shortDate(user.premiumUntil ?? sub.updatedAt)}.` : "Not active."}</span>
+              <Link href="/premium" className="btn btn-primary btn-sm">Get Premium</Link>
+            </div>
+          )}
+          {portal && <p className="mt-3 text-sm text-bad">Couldn&apos;t open the billing portal. Try again, or contact support.</p>}
+        </Section>
+      </div>
 
       <Section title="Account" desc="Email and username can't be changed yet.">
         <dl className="grid grid-cols-[120px_1fr] gap-2 text-sm">

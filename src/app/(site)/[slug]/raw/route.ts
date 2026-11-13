@@ -3,6 +3,7 @@ import { getUser } from "@/lib/auth";
 import { hasGrant } from "@/lib/grant";
 import { isExpired } from "@/lib/pastes";
 import { richToText } from "@/lib/rich";
+import { isPremium } from "@/lib/premium";
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -15,7 +16,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (isExpired(p) && !isOwner) return deny("This paste expired.", 410);
   if (p.burnAfterRead && !isOwner) return deny("Open this paste on its page.");
   if (p.passwordHash && !isOwner && !(await hasGrant("pw", p.id))) return deny("Password required. Open the paste page first.");
-  if (p.earning && !isOwner && !(await hasGrant("u", p.id))) return deny("Unlock this paste on its page first.");
+  if (p.earning && !isOwner && !isPremium(user) && !(await hasGrant("u", p.id))) return deny("Unlock this paste on its page first.");
   const download = new URL(req.url).searchParams.has("download");
   const name = (p.filename || `${p.slug}.txt`).replace(/[^\w.-]/g, "_");
   const body = p.format === "rich" ? richToText(p.content) : p.content;

@@ -39,7 +39,7 @@ const LABELS: Record<Step["kind"], [string, string]> = {
   wait: ["Short wait", "The creator added a short wait."],
 };
 
-export function UnlockGate({ kind, slug, onDoneHref }: { kind: "paste" | "locker"; slug: string; onDoneHref?: string }) {
+export function UnlockGate({ kind, slug, onDoneHref, premiumHref }: { kind: "paste" | "locker"; slug: string; onDoneHref?: string; premiumHref?: string }) {
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
   const [index, setIndex] = useState(0);
@@ -218,6 +218,11 @@ export function UnlockGate({ kind, slug, onDoneHref }: { kind: "paste" | "locker
           </div>
         )}
         {done && <p className="mt-6 text-center text-sm text-ok">Unlocked. Opening…</p>}
+        {premiumHref && !done && (
+          <p className="mt-4 text-center text-xs text-muted">
+            Skip every unlock: <a href={premiumHref} className="font-semibold text-rose hover:underline">get Premium</a>
+          </p>
+        )}
       </div>
     </div>
   );
