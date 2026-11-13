@@ -48,7 +48,7 @@ export default async function PremiumPage({ searchParams }: { searchParams: SP }
         {[
           ["No unlock steps", "Earning pastes and links open straight away."],
           ["No ads", "No ad slots or sponsor pages while you browse."],
-          ["Supports creators", `Creators get ${SHARE.basePct}–${SHARE.boostedPct}% of what we receive from your plan.`],
+          ["Supports creators", `Creators get ${SHARE.basePct}–${SHARE.boostedPct}% of your plan's price.`],
         ].map(([t, d]) => (
           <div key={t} className="card p-5">
             <p className="font-semibold">{t}</p>

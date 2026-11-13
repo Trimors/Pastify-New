@@ -38,7 +38,7 @@ export default function PricingPage() {
         <div>
           <p className="label">Visitors</p>
           <p className="text-lg font-semibold">Premium: skip every unlock, no ads</p>
-          <p className="text-sm text-muted">From $2.99/month on the yearly plan. Creators get 50–70% of what we receive.</p>
+          <p className="text-sm text-muted">From $2.99/month on the yearly plan. Creators get 50–70% of the price.</p>
         </div>
         <Link href="/premium" className="btn btn-secondary">See Premium</Link>
       </div>

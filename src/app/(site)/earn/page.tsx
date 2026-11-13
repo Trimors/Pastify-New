@@ -5,7 +5,7 @@ import { countryName, flag } from "@/lib/geo";
 export const metadata = { title: "Earn", description: "Published rates, clear payout rules. Earn from every unlock." };
 
 const FAQ: [string, string][] = [
-  ["How do Premium sales pay?", "Visitors can buy Premium to skip unlocks. When they buy from your unlock page or your Premium link, you get 50% of what Pastify receives (after tax and payment fees) from that sale and every renewal, and 70% from your 6th sale of the day (UTC). Premium visitors open your pastes without unlocking, so those views don't add unlock earnings."],
+  ["How do Premium sales pay?", "Visitors can buy Premium to skip unlocks. When they buy from your unlock page or your Premium link, you get 50% of the plan price (before tax) from that sale and every renewal, and 70% from your 6th sale of the day (UTC). Premium visitors open your pastes without unlocking, so those views don't add unlock earnings."],
   ["What counts as an unlock?", `A real visitor who finishes every step. Each visitor counts once per item every ${EARN.uniqueWindowHours} hours. Bots, scripts and your own visits don't count.`],
   ["What do visitors have to do?", "A short check, then usually a sponsor visit. You pick Light, Standard or Heavy steps for each locker. Earning pastes use Standard."],
   ["When do I get paid?", `Request a cashout from $${EARN.payoutMinimumUsd}. We aim to pay within ${EARN.payoutTargetDays} business days and show every request's status in your dashboard.`],

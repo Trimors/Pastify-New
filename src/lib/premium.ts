@@ -13,7 +13,7 @@ export const PLANS = [
 ] as const;
 export type PlanId = (typeof PLANS)[number]["id"];
 
-/** Creator share of what Pastify receives (after tax and Paddle's fee). */
+/** Creator share of the full plan price (before tax; Pastify covers Paddle's fee). */
 export const SHARE = { basePct: 50, boostedPct: 70, boostFromSaleOfDay: 6 } as const;
 
 export function paddleReady() {
@@ -100,7 +100,19 @@ export function verifyPaddleSignature(raw: string, header: string | null, secret
 
 type Money = { total?: string; tax?: string; fee?: string; earnings?: string; subtotal?: string; currency_code?: string };
 
-/** Net amount Pastify receives in USD cents, or null when it isn't in USD. */
+/**
+ * Full price the buyer paid for the plan, before tax, in USD cents.
+ * Falls back to the plan's list price when Paddle charged in another currency.
+ */
+function priceUsdCents(totals: Money | undefined, plan: string) {
+  if (totals?.currency_code === "USD" && totals.subtotal) {
+    return Math.max(0, Number(totals.subtotal) - Number((totals as Money & { discount?: string }).discount ?? 0));
+  }
+  const p = PLANS.find((x) => x.id === plan);
+  return p ? Math.round(p.billed * 100) : null;
+}
+
+/** Net amount Pastify receives in USD cents (after tax and Paddle's fee), kept for reporting. */
 function netUsdCents(details: { totals?: Money; payout_totals?: Money } | undefined) {
   const p = details?.payout_totals;
   if (p?.currency_code === "USD" && p.earnings) return Number(p.earnings);
@@ -176,13 +188,14 @@ async function recordSale(t: TxnData) {
   const total = t.details?.totals;
   const gross = Number(total?.total ?? 0);
   const net = netUsdCents(t.details);
+  const price = priceUsdCents(total, plan);
 
   let sharePct = 0;
   let shareMicros = 0n;
-  if (creatorId && net !== null && net > 0) {
+  if (creatorId && price !== null && price > 0) {
     const nth = (await salesTodayFor(creatorId)) + 1;
     sharePct = nth >= SHARE.boostFromSaleOfDay ? SHARE.boostedPct : SHARE.basePct;
-    shareMicros = BigInt(Math.floor((net * 10_000 * sharePct) / 100)); // cents → micros
+    shareMicros = BigInt(Math.floor((price * 10_000 * sharePct) / 100)); // cents → micros
   }
 
   await db.$transaction(async (tx) => {
@@ -210,7 +223,7 @@ async function recordSale(t: TxnData) {
     const u = await db.user.findUnique({ where: { id: buyerId }, select: { premiumUntil: true } });
     if (!u?.premiumUntil || u.premiumUntil < end) await setPremiumUntil(buyerId, end);
   }
-  return { creatorId, sharePct, net };
+  return { creatorId, sharePct, price, net };
 }
 
 type AdjData = { id: string; action: string; status: string; transaction_id: string; totals?: { total?: string } };

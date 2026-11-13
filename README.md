@@ -58,7 +58,7 @@ Engineered by Trimors Technologies.
 **Visitor Premium (Paddle)**
 - `/premium`: 1 month $9.99, 3 months $6.99/mo ($20.97), 12 months $2.99/mo ($35.88). Premium members skip unlock steps and ads
 - Every unlock page has a "get Premium" link that credits the creator; creators also get a `/premium?ref=code` link
-- Creators get **50%** of the net Pastify receives (after tax and Paddle's fee) on each sale and renewal, **70%** from their 6th sale of the UTC day
+- Creators get **50%** of the plan price (before tax; Pastify pays Paddle's fee) on each sale and renewal, **70%** from their 6th sale of the UTC day
 - Attribution is signed, so a buyer can't redirect the share to themselves; buyers can't earn on their own purchases
 - Refunds and chargebacks take back the share in proportion; a full refund ends access
 - Webhook (`/api/paddle/webhook`) checks Paddle's signature and ignores repeated events

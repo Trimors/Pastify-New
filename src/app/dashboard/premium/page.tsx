@@ -29,7 +29,7 @@ export default async function CreatorPremiumPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Premium sales</h1>
         <p className="text-sm text-muted">
-          Visitors can skip your unlocks by buying Premium. You get {SHARE.basePct}% of what Pastify receives from each sale and every renewal, and {SHARE.boostedPct}% from your {SHARE.boostFromSaleOfDay}th sale of the day (UTC).
+          Visitors can skip your unlocks by buying Premium. You get {SHARE.basePct}% of the plan price (before tax) on each sale and every renewal, and {SHARE.boostedPct}% from your {SHARE.boostFromSaleOfDay}th sale of the day (UTC).
         </p>
         {!paddleReady() && <p className="mt-2 rounded-lg border border-warn/30 bg-warn/10 p-3 text-sm text-warn">Premium checkout isn&apos;t switched on yet. Sales will show here once it is.</p>}
       </div>
