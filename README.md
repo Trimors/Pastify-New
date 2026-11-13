@@ -116,6 +116,10 @@ Open http://localhost:3000.
 4. Deploy. The build runs database migrations automatically.
 5. Create your admin: run the seed command once against the production database.
 
+### Plesk
+
+Step-by-step guide: [docs/DEPLOY_PLESK.md](docs/DEPLOY_PLESK.md). It uses Plesk's Node.js extension with `app.js` as the startup file.
+
 ### Self-host with Docker
 
 Put your settings in `.env`, then:
