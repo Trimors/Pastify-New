@@ -66,11 +66,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
       {(sp.welcome || empty) && (
         <div className="card relative overflow-hidden p-6">
           <div className="pointer-events-none absolute inset-0 bg-gradient opacity-[0.06]" />
-          <p className="relative text-lg font-semibold">{sp.welcome ? "Account created." : "Nothing shared yet."} Make your first earning link.</p>
-          <p className="relative mt-1 text-sm text-muted">Create a paste with Earning on, or lock any link. Share it anywhere and every unique unlock pays you.</p>
+          <p className="relative text-lg font-semibold">{sp.welcome ? "Account created." : "Nothing shared yet."} Make your first earning paste.</p>
+          <p className="relative mt-1 text-sm text-muted">Create a paste with Earning on and share it anywhere. Every unique unlock pays you.</p>
           <div className="relative mt-4 flex flex-wrap gap-2">
             <Link href="/new" className="btn btn-primary btn-sm">Create paste</Link>
-            <Link href="/dashboard/lockers/new" className="btn btn-secondary btn-sm">Lock a link</Link>
+            <Link href="/switch" className="btn btn-secondary btn-sm">Moving from Paster?</Link>
             <Link href="/earn" className="btn btn-ghost btn-sm">See rates</Link>
           </div>
         </div>

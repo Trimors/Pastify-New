@@ -1,8 +1,9 @@
 import "server-only";
 import { z } from "zod";
 import { db } from "./db";
-import { hashPassword } from "./auth";
-import { shortId } from "./ids";
+import { hashPassword, verifyPassword } from "./auth";
+import { shortId, token } from "./ids";
+import { richToText, sanitizeRich } from "./rich";
 import { LANGUAGE_IDS, detectLanguage } from "./languages";
 
 export const MAX_PASTE_BYTES = 512 * 1024;
@@ -42,15 +43,29 @@ export const pasteInput = z.object({
   burnAfterRead: boolish,
   password: z.string().max(200).optional().default(""),
   removePassword: boolish,
-  expiry: z.enum(EXPIRY_OPTIONS.map((e) => e.id) as [string, ...string[]]).optional(),
+  // "" means "keep current" in the edit form.
+  expiry: z.preprocess((v) => (v === "" ? undefined : v), z.enum(EXPIRY_OPTIONS.map((e) => e.id) as [string, ...string[]]).optional()),
   folder: z.string().trim().max(60).optional().default(""),
+  format: z.enum(["code", "rich"]).optional().default("code"),
+  /** Custom edit code. Anonymous pastes always get one (generated if empty). */
+  editCode: z
+    .string()
+    .trim()
+    .max(64)
+    .optional()
+    .default("")
+    .refine((v) => !v || v.length >= 6, "Edit code needs at least 6 characters."),
 });
 
 export type PasteInput = z.input<typeof pasteInput>;
 
+/** Six-character top-level pages a random slug must never shadow. */
+const RESERVED_SLUGS = new Set(["switch", "signup", "logout", "report", "search", "status"]);
+
 async function newSlug() {
   for (let i = 0; i < 8; i++) {
     const s = shortId();
+    if (RESERVED_SLUGS.has(s.toLowerCase())) continue;
     const [p, l] = await Promise.all([
       db.paste.findUnique({ where: { slug: s }, select: { id: true } }),
       db.locker.findUnique({ where: { slug: s }, select: { id: true } }),
@@ -69,23 +84,29 @@ async function folderId(userId: string | null, name: string) {
 }
 
 function normalise(data: z.output<typeof pasteInput>, userId: string | null) {
-  const bytes = Buffer.byteLength(data.content, "utf8");
+  const rich = data.format === "rich";
+  const content = rich ? sanitizeRich(data.content) : data.content;
+  const text = rich ? richToText(content) : content;
+  if (!text.trim()) throw new Error("Paste is empty.");
+  const bytes = Buffer.byteLength(content, "utf8");
   if (bytes > MAX_PASTE_BYTES) throw new Error("Paste is larger than 512 KB.");
   let language = LANGUAGE_IDS.includes(data.language) ? data.language : "";
-  if (!language || language === "auto") language = detectLanguage(data.filename) ?? "text";
+  if (rich) language = "text";
+  else if (!language || language === "auto") language = detectLanguage(data.filename) ?? "text";
   const earning = !!userId && data.earning && data.visibility !== "PRIVATE" && !data.burnAfterRead;
   const title = data.title || data.filename || "Untitled paste";
   return {
     title,
     filename: data.filename || null,
     language,
-    content: data.content,
+    format: data.format,
+    content,
     description: data.description || null,
     tags: data.tags,
     visibility: userId ? data.visibility : data.visibility === "PRIVATE" ? "UNLISTED" : data.visibility,
     earning,
     burnAfterRead: data.burnAfterRead,
-    lineCount: data.content.split("\n").length,
+    lineCount: text.split("\n").length,
     sizeBytes: bytes,
   } as const;
 }
@@ -95,43 +116,67 @@ function expiryDate(id: string | undefined) {
   return opt && opt.minutes > 0 ? new Date(Date.now() + opt.minutes * 60e3) : null;
 }
 
+/** Creates a paste. Returns it with `editCode` set when one was issued (shown to the creator once). */
 export async function createPaste(raw: unknown, userId: string | null) {
   const data = pasteInput.parse(raw);
   const base = normalise(data, userId);
-  return db.paste.create({
+  const editCode = data.editCode || (userId ? "" : token(9));
+  const p = await db.paste.create({
     data: {
       ...base,
       slug: await newSlug(),
       userId,
       folderId: await folderId(userId, data.folder),
       passwordHash: data.password ? await hashPassword(data.password) : null,
+      editCodeHash: editCode ? await hashPassword(editCode) : null,
       expiresAt: expiryDate(data.expiry),
     },
   });
+  return { ...p, editCode: editCode || null };
 }
 
-export async function updatePaste(id: string, raw: unknown, userId: string) {
+/** Who may edit: the owner (userId) or anyone holding the paste's edit code. */
+export type EditAuth = { userId?: string | null; editCode?: string | null };
+
+export async function canEdit(p: { userId: string | null; editCodeHash: string | null }, auth: EditAuth) {
+  if (auth.userId && p.userId === auth.userId) return true;
+  if (auth.editCode && p.editCodeHash) return verifyPassword(auth.editCode, p.editCodeHash);
+  return false;
+}
+
+export async function updatePaste(id: string, raw: unknown, auth: EditAuth) {
+  const existing = await db.paste.findUnique({ where: { id }, select: { userId: true, editCodeHash: true } });
+  if (!existing || !(await canEdit(existing, auth))) throw new Error("Paste not found.");
+  return updatePasteAuthorized(id, raw);
+}
+
+/** Applies an update. Only call after the caller has been authorized (owner or edit-code grant). */
+export async function updatePasteAuthorized(id: string, raw: unknown) {
   const data = pasteInput.partial({ content: true }).parse(raw);
-  const existing = await db.paste.findFirst({ where: { id, userId } });
+  const existing = await db.paste.findUnique({ where: { id } });
   if (!existing) throw new Error("Paste not found.");
+  const r = (raw ?? {}) as Record<string, unknown>;
   const merged = pasteInput.parse({
     title: data.title ?? existing.title,
     filename: data.filename ?? existing.filename ?? "",
     language: data.language || existing.language,
     content: data.content ?? existing.content,
+    format: r.format !== undefined ? data.format : existing.format,
     description: data.description ?? existing.description ?? "",
-    tags: (raw as Record<string, unknown>)?.tags !== undefined ? data.tags : existing.tags,
+    tags: r.tags !== undefined ? data.tags : existing.tags,
     visibility: data.visibility ?? existing.visibility,
-    earning: (raw as Record<string, unknown>)?.earning !== undefined ? data.earning : existing.earning,
-    burnAfterRead: (raw as Record<string, unknown>)?.burnAfterRead !== undefined ? data.burnAfterRead : existing.burnAfterRead,
+    earning: r.earning !== undefined ? data.earning : existing.earning,
+    burnAfterRead: r.burnAfterRead !== undefined ? data.burnAfterRead : existing.burnAfterRead,
   });
-  const base = normalise(merged, userId);
+  const ownerId = existing.userId;
+  const base = normalise(merged, ownerId);
   return db.paste.update({
     where: { id },
     data: {
       ...base,
-      ...(data.folder !== undefined ? { folderId: await folderId(userId, data.folder) } : {}),
+      ...(data.folder !== undefined && ownerId ? { folderId: await folderId(ownerId, data.folder) } : {}),
       ...(data.password ? { passwordHash: await hashPassword(data.password) } : data.removePassword ? { passwordHash: null } : {}),
+      ...(data.editCode && ownerId ? { editCodeHash: await hashPassword(data.editCode) } : {}),
       ...(data.expiry ? { expiresAt: expiryDate(data.expiry) } : {}),
     },
   });
@@ -142,7 +187,7 @@ export function isExpired(p: { expiresAt: Date | null }) {
 }
 
 export function publicPaste(p: {
-  slug: string; title: string; filename: string | null; language: string; visibility: string; earning: boolean;
+  slug: string; title: string; filename: string | null; language: string; format?: string; visibility: string; earning: boolean;
   expiresAt: Date | null; views: number; unlocks: number; lineCount: number; sizeBytes: number; createdAt: Date; tags: string[];
   passwordHash?: string | null; burnAfterRead?: boolean;
 }) {
@@ -151,6 +196,7 @@ export function publicPaste(p: {
     title: p.title,
     filename: p.filename,
     language: p.language,
+    format: p.format ?? "code",
     visibility: p.visibility.toLowerCase(),
     earning: p.earning,
     passwordProtected: !!p.passwordHash,

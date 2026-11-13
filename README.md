@@ -7,7 +7,13 @@ Engineered by Trimors Technologies.
 ## What's in this version
 
 **Pastes**
-- Editor with line numbers, tab indent, Ctrl + Enter to save, language auto-detected from the file name
+- Two formats: **Rich text** (headings, bold/italic/underline, lists, quotes, code blocks, links, alignment, Markdown-style shortcuts) and **Code** (line numbers, syntax highlighting)
+- Rich text is sanitized on save and on display, so pasted or API-sent HTML can't run scripts
+- **Templates** for posts you write often, inserted from the editor
+- **Clone** from a Pastify link or ID, Pastebin, Rentry, GitHub Gist, paste.ee or dpaste (fixed list of hosts only)
+- **Edit codes**: anonymous pastes get one (shown once), and logged-in creators can set one so others can edit without their account
+- Keyboard shortcuts on pastes (E edit, C copy, Q copy link, R raw, Shift+T/R/X share, ? help) and share buttons for Telegram, Reddit, X and WhatsApp
+- Code editor with line numbers, tab indent, Ctrl + Enter to save, language auto-detected from the file name
 - Syntax highlighting for 30+ languages (Shiki, Pastify colour theme)
 - Public, Unlisted and Private visibility
 - **Earning** pastes: content is hidden until the visitor completes the unlock steps
@@ -43,6 +49,7 @@ Engineered by Trimors Technologies.
 - Settings: profile, password change (signs out other devices), two-factor sign-in (TOTP), active sessions, account deletion
 
 **Public site**
+- "Moving from Paster" page (`/switch`) with a move guide and a dated side-by-side comparison, linked from the home page and footer
 - Landing page, Explore (search, language, tags, newest / trending), creator profiles `/u/name`
 - Earn page with the **public rate table** and payout rules, Pricing, API docs
 - Terms, Privacy, Content policy, Report abuse form
@@ -127,7 +134,7 @@ Also review:
 
 ## Not built yet (next steps)
 
-- **Visitor Premium** (visitors pay to skip steps, creators get a revenue share): needs a Stripe or PayPal account
+- **Visitor Premium with pay-per-sale** (visitors pay to skip steps, creators get a share of each sale): planned with **Paddle**
 - **Emails** (welcome, payout paid/rejected, content removed): needs an email provider such as Resend or Postmark
 - Automatic payouts through the PayPal Payouts API or a crypto payout provider
 - World map on the dashboard

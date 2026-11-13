@@ -13,7 +13,7 @@ export default function PricingPage() {
           <p className="font-mono text-4xl">$0</p>
           <ul className="mt-5 space-y-2 text-sm text-muted">
             <li>Unlimited public and unlisted pastes</li>
-            <li>Syntax highlighting for 30+ languages</li>
+            <li>Rich text or code with highlighting for 30+ languages</li>
             <li>Expiry, passwords and burn after reading</li>
             <li>Raw and download links</li>
           </ul>
@@ -25,7 +25,7 @@ export default function PricingPage() {
           <p className="font-mono text-4xl">$0</p>
           <ul className="relative mt-5 space-y-2 text-sm text-muted">
             <li>Everything for anyone, plus private pastes and folders</li>
-            <li>Earning pastes and link lockers</li>
+            <li>Earning pastes, templates and link lockers</li>
             <li>Full analytics: countries, sources, devices</li>
             <li>Cashouts by PayPal or crypto</li>
             <li>REST API, bulk lockers, referrals</li>

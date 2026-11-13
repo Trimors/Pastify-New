@@ -15,6 +15,7 @@ const endpoints: { m: string; p: string; d: string; body?: string; res?: string 
     d: "Create a paste. Only content is required.",
     body: `{
   "content": "print('hi')",
+  "format": "code",              // code | rich (rich = HTML, sanitized)
   "title": "hello.py",
   "filename": "hello.py",
   "language": "python",          // or omit to detect from filename
@@ -23,7 +24,8 @@ const endpoints: { m: string; p: string; d: string; body?: string; res?: string 
   "expiry": "7d",                // never | 10m | 1h | 1d | 7d | 30d | 1y
   "password": "optional",
   "burnAfterRead": false,
-  "tags": ["python", "demo"]
+  "tags": ["python", "demo"],
+  "editCode": "optional, 6+ chars"
 }`,
     res: `{ "data": { "slug": "x8Kq2a", "url": "${B}/x8Kq2a", ... } }`,
   },

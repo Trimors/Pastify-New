@@ -9,6 +9,9 @@ export default function Home() {
         <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-gradient opacity-[0.12] blur-3xl" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-16 md:grid-cols-[1.1fr_1fr] md:pt-24">
           <div>
+            <Link href="/switch" className="mb-5 inline-flex items-center gap-2 rounded-full border border-magenta/40 bg-magenta/10 px-3 py-1 text-xs font-semibold text-rose hover:bg-magenta/15">
+              Moving from Paster? Start here →
+            </Link>
             <p className="label !text-rose">Paste · Share · Earn</p>
             <h1 className="mt-3 text-5xl font-extrabold leading-[1.02] tracking-[-0.04em] sm:text-6xl">
               Paste once.
@@ -35,9 +38,9 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="text-3xl font-bold tracking-tight">How it works</h2>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <Step n="01" t="Paste or lock a link" d="Code with highlighting, plain text, or any link you want behind a locker." />
+          <Step n="01" t="Paste anything" d="Code with highlighting, or rich text with headings, lists and links." />
           <Step n="02" t="Share it anywhere" d="Short links with clean previews on Discord, X, Telegram and YouTube." />
-          <Step n="03" t="Get paid" d="Visitors take a few quick steps to unlock. Every unique unlock counts toward your payout." />
+          <Step n="03" t="Get paid" d="Turn on Earning and visitors take a quick unlock. Every unique unlock counts toward your payout." />
         </div>
       </section>
 
@@ -51,10 +54,10 @@ export default function Home() {
             {[
               ["Public rates", "CPM for every country, on a public page. No guessing."],
               ["Clear payouts", `$${EARN.payoutMinimumUsd} minimum. PayPal or crypto. Every request and status in your dashboard.`],
-              ["Your steps, your choice", "Pick light, standard or heavy unlocks for each link."],
+              ["Short unlocks", "Seconds, not minutes. Visitors stay, so more of them unlock."],
               ["Real views only", "Server-checked steps, bot filtering and one count per visitor per day."],
-              ["Pastes, not just links", "Syntax highlighting, expiry, passwords, burn after reading, folders."],
-              ["Secure accounts", "Two-factor sign-in and API keys you can revoke."],
+              ["A real editor", "Rich text or code, templates, clone from other pastebins, expiry, passwords, folders."],
+              ["Your data, your way", "Raw and download on every paste, a documented API, and two-factor sign-in."],
             ].map(([t, d]) => (
               <li key={t} className="card flex gap-4 p-4">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-gradient" />

@@ -30,5 +30,9 @@ export async function revealBurn(slug: string) {
     const deleted = await db.paste.deleteMany({ where: { id: p.id } });
     if (deleted.count === 0) return { error: "This paste was already read and deleted." };
   }
-  return { content: p.content, html: await highlight(p.content, p.language) };
+  if (p.format === "rich") {
+    const { richToText, sanitizeRich } = await import("@/lib/rich");
+    return { content: richToText(p.content), html: sanitizeRich(p.content), rich: true };
+  }
+  return { content: p.content, html: await highlight(p.content, p.language), rich: false };
 }

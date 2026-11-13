@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getUser } from "@/lib/auth";
 import { hasGrant } from "@/lib/grant";
 import { isExpired } from "@/lib/pastes";
+import { richToText } from "@/lib/rich";
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -17,7 +18,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (p.earning && !isOwner && !(await hasGrant("u", p.id))) return deny("Unlock this paste on its page first.");
   const download = new URL(req.url).searchParams.has("download");
   const name = (p.filename || `${p.slug}.txt`).replace(/[^\w.-]/g, "_");
-  return new Response(p.content, {
+  const body = p.format === "rich" ? richToText(p.content) : p.content;
+  return new Response(body, {
     headers: {
       "content-type": "text/plain; charset=utf-8",
       "x-robots-tag": "noindex",

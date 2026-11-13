@@ -18,7 +18,7 @@ export const GET = withApi<Ctx>(async (_req, user, { params }) => {
 export const PATCH = withApi<Ctx>(async (req, user, { params }) => {
   const p = await own((await params).slug, user.id);
   if (!p) return apiError("not_found", "Paste not found.", 404);
-  const updated = await updatePaste(p.id, await req.json(), user.id);
+  const updated = await updatePaste(p.id, await req.json(), { userId: user.id });
   return json({ data: { ...publicPaste(updated), url: `${SITE_URL}/${updated.slug}` } });
 });
 

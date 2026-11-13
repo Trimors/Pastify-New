@@ -11,6 +11,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     take: 5000,
     select: { slug: true, updatedAt: true },
   });
-  const statics = ["", "/explore", "/earn", "/pricing", "/docs/api", "/legal/terms", "/legal/privacy", "/legal/content"].map((p) => ({ url: `${SITE_URL}${p}` }));
+  const statics = ["", "/explore", "/earn", "/pricing", "/switch", "/docs/api", "/legal/terms", "/legal/privacy", "/legal/content"].map((p) => ({ url: `${SITE_URL}${p}` }));
   return [...statics, ...pastes.map((p) => ({ url: `${SITE_URL}/${p.slug}`, lastModified: p.updatedAt }))];
 }

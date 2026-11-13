@@ -79,6 +79,7 @@ model User {
   apiKeys  ApiKey[]
   pastes   Paste[]
   folders  Folder[]
+  templates Template[]
   lockers  Locker[]
   ledger   LedgerEntry[]
   payouts  Payout[]
@@ -130,7 +131,11 @@ model Paste {
   title         String
   filename      String?
   language      String        @default("text")
+  /// "code" = plain text with syntax highlighting, "rich" = sanitized HTML from the rich editor
+  format        String        @default("code")
   content       String
+  /// bcrypt hash of the edit code; lets anyone holding the code edit the paste without an account
+  editCodeHash  String?
   description   String?
   tags          String[]
   visibility    Visibility    @default(PUBLIC)
@@ -269,4 +274,17 @@ model RateLimit {
   key       String   @id
   count     Int
   resetAt   DateTime
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  format    String   @default("rich")
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt])
 }

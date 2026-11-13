@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 const ITEMS = [
   { href: "/dashboard", label: "Overview", icon: "M3 12h4l3-8 4 16 3-8h4" },
   { href: "/dashboard/vault", label: "Vault", icon: "M4 6h16M4 12h16M4 18h10" },
-  { href: "/dashboard/lockers/new", label: "New locker", icon: "M12 5v14M5 12h14" },
+  { href: "/dashboard/templates", label: "Templates", icon: "M4 4h16v6H4zM4 14h7v6H4zM15 14h5v6h-5z" },
   { href: "/dashboard/earnings", label: "Earnings", icon: "M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" },
   { href: "/dashboard/referrals", label: "Referrals", icon: "M16 21v-2a4 4 0 0 0-8 0v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.9M2 21v-2a4 4 0 0 1 3-3.9" },
   { href: "/dashboard/api", label: "API", icon: "M8 9l-4 3 4 3M16 9l4 3-4 3M14 5l-4 14" },

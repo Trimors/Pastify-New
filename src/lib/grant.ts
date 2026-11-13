@@ -10,11 +10,11 @@ function sign(payload: string) {
   return createHmac("sha256", process.env.AUTH_SECRET || "dev").update(payload).digest("base64url");
 }
 
-function name(kind: "u" | "pw", id: string) {
+function name(kind: "u" | "pw" | "ec", id: string) {
   return `pf_${kind}_${id.slice(-12)}`;
 }
 
-export async function setGrant(kind: "u" | "pw", id: string, hours = 24) {
+export async function setGrant(kind: "u" | "pw" | "ec", id: string, hours = 24) {
   const exp = Date.now() + hours * 3600e3;
   const payload = `${kind}.${id}.${exp}`;
   (await cookies()).set(name(kind, id), `${exp}.${sign(payload)}`, {
@@ -26,7 +26,7 @@ export async function setGrant(kind: "u" | "pw", id: string, hours = 24) {
   });
 }
 
-export async function hasGrant(kind: "u" | "pw", id: string) {
+export async function hasGrant(kind: "u" | "pw" | "ec", id: string) {
   const v = (await cookies()).get(name(kind, id))?.value;
   if (!v) return false;
   const [expStr, sig] = v.split(".");
