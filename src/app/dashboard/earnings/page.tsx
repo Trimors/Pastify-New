@@ -9,7 +9,7 @@ import { cashout, savePayoutMethod } from "./actions";
 
 export const metadata = { title: "Earnings" };
 
-const TYPE_LABEL = { EARNING: "Unlock earnings", REFERRAL: "Referral commission", PAYOUT: "Cashout", PAYOUT_REVERSAL: "Cashout returned", ADJUSTMENT: "Adjustment", PREMIUM_SALE: "Premium sales", PREMIUM_REFUND: "Premium refunds" } as const;
+const TYPE_LABEL = { EARNING: "View earnings", REFERRAL: "Referral commission", PAYOUT: "Cashout", PAYOUT_REVERSAL: "Cashout returned", ADJUSTMENT: "Adjustment", PREMIUM_SALE: "Premium sales", PREMIUM_REFUND: "Premium refunds" } as const;
 
 export default async function EarningsPage() {
   const user = await requireUser();
@@ -100,7 +100,7 @@ export default async function EarningsPage() {
             {ledger.map((r, i) => (
               <tr key={i} className="border-t border-line first:border-t-0">
                 <td className="px-4 py-2.5 text-muted">{shortDate(new Date(r.d))}</td>
-                <td className="px-4">{TYPE_LABEL[r.type as keyof typeof TYPE_LABEL] ?? r.type}{r.type === "EARNING" && <span className="text-muted"> · {Number(r.n)} unlocks</span>}</td>
+                <td className="px-4">{TYPE_LABEL[r.type as keyof typeof TYPE_LABEL] ?? r.type}{r.type === "EARNING" && <span className="text-muted"> · {Number(r.n)} paid views</span>}</td>
                 <td className={`px-4 text-right font-mono ${r.amount < 0n ? "text-muted" : "text-ok"}`}>{r.amount < 0n ? "−" : "+"}{usd(r.amount < 0n ? -r.amount : r.amount, 2)}</td>
               </tr>
             ))}

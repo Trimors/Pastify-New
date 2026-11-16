@@ -7,7 +7,7 @@ const B = SITE_URL;
 
 const endpoints: { m: string; p: string; d: string; body?: string; res?: string }[] = [
   { m: "GET", p: "/api/v1/me", d: "Your username and current balance.", res: `{ "data": { "username": "you", "balanceUsd": 12.34 } }` },
-  { m: "GET", p: "/api/v1/stats?period=28d", d: "Views, unlocks and earnings. period: today, 7d, 28d, 90d, all." },
+  { m: "GET", p: "/api/v1/stats?period=28d", d: "Views, paid views (unlocks) and earnings. period: today, 7d, 28d, 90d, all." },
   { m: "GET", p: "/api/v1/pastes?page=1&limit=25", d: "List your pastes, newest first." },
   {
     m: "POST",

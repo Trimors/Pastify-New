@@ -19,7 +19,7 @@ export default function Home() {
               <span className="text-gradient">Earn forever.</span>
             </h1>
             <p className="mt-5 max-w-lg text-lg text-muted">
-              Share code, configs, notes and links. Turn on Earning and get paid for every unique unlock, at rates we publish.
+              Share code, configs, notes and links. Turn on Earning and get paid for every unique view, at rates we publish.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/new" className="btn btn-primary">Create paste</Link>
@@ -40,7 +40,7 @@ export default function Home() {
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           <Step n="01" t="Paste anything" d="Code with highlighting, or rich text with headings, lists and links." />
           <Step n="02" t="Share it anywhere" d="Short links with clean previews on Discord, X, Telegram and YouTube." />
-          <Step n="03" t="Get paid" d="Turn on Earning and visitors take a quick unlock. Every unique unlock counts toward your payout." />
+          <Step n="03" t="Get paid" d="Turn on Earning. Visitors open your paste straight away, and every unique view counts toward your payout." />
         </div>
       </section>
 
@@ -54,7 +54,7 @@ export default function Home() {
             {[
               ["Public rates", "CPM for every country, on a public page. No guessing."],
               ["Clear payouts", `$${EARN.payoutMinimumUsd} minimum. PayPal or crypto. Every request and status in your dashboard.`],
-              ["Short unlocks", "Seconds, not minutes. Visitors stay, so more of them unlock."],
+              ["No waiting", "Pastes open straight away. No steps, no countdowns."],
               ["Real views only", "Server-checked steps, bot filtering and one count per visitor per day."],
               ["A real editor", "Rich text or code, templates, clone from other pastebins, expiry, passwords, folders."],
               ["Your data, your way", "Raw and download on every paste, a documented API, and two-factor sign-in."],

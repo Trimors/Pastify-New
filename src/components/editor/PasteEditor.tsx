@@ -282,7 +282,7 @@ export function PasteEditor({ action, loggedIn, initial = {}, folders = [], temp
                   ) : visibility === "PRIVATE" || burn ? (
                     "Not available for private or burn-after-read pastes."
                   ) : (
-                    "Visitors complete a quick unlock. You earn per unique unlock."
+                    "Shows an ad beside your paste. You earn per unique view. Visitors never wait."
                   )}
                 </span>
               </span>

@@ -29,7 +29,7 @@ export default async function CreatorPremiumPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Premium sales</h1>
         <p className="text-sm text-muted">
-          Visitors can skip your unlocks by buying Premium. You get {SHARE.basePct}% of the plan price (before tax) on each sale and every renewal, and {SHARE.boostedPct}% from your {SHARE.boostFromSaleOfDay}th sale of the day (UTC).
+          Visitors can remove ads by buying Premium. You get {SHARE.basePct}% of the plan price (before tax) on each sale and every renewal, and {SHARE.boostedPct}% from your {SHARE.boostFromSaleOfDay}th sale of the day (UTC).
         </p>
         {!paddleReady() && <p className="mt-2 rounded-lg border border-warn/30 bg-warn/10 p-3 text-sm text-warn">Premium checkout isn&apos;t switched on yet. Sales will show here once it is.</p>}
       </div>
@@ -43,7 +43,7 @@ export default async function CreatorPremiumPage() {
 
       <section className="card space-y-3 p-5">
         <p className="font-semibold">Your Premium link</p>
-        <p className="text-sm text-muted">Sales count for you when visitors buy from one of your unlock pages, or from this link.</p>
+        <p className="text-sm text-muted">Sales count for you when visitors buy from one of your pastes or lockers, or from this link.</p>
         <div className="flex items-center justify-between gap-3 rounded-lg border border-line bg-ink px-3 py-2">
           <span className="truncate font-mono text-sm">{SITE_HOST}/premium?ref={user.referralCode}</span>
           <CopyButton text={link} />

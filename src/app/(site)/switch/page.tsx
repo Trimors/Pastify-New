@@ -3,7 +3,7 @@ import { EARN, RATE_TIERS } from "@/lib/config";
 
 export const metadata = {
   title: "Moving from Paster",
-  description: "Paster is winding down. Bring your pastes to Pastify: rich text, templates, published rates and quick unlocks.",
+  description: "Paster is winding down. Bring your pastes to Pastify: rich text, templates, published rates and no waiting for visitors.",
 };
 
 const ROWS: [string, string, string][] = [
@@ -15,7 +15,7 @@ const ROWS: [string, string, string][] = [
   ["Password, expiry, burn after reading", "No", "Yes"],
   ["Raw view and download", "No", "Yes"],
   ["Public explore page and profiles", "No", "Yes"],
-  ["Visitor wait before content", "15 seconds to 180 minutes", "A few seconds"],
+  ["Visitor wait before content", "15 seconds to 180 minutes", "None"],
   ["Published rates per country", "No", "Yes"],
   ["Documented API", "Docs offline", "Yes"],
   ["Still being developed", "No, winding down", "Yes"],
@@ -99,8 +99,8 @@ export default function SwitchPage() {
           {[
             ["What happens to my Paster balance?", "It stays with Paster. Contact Paster to withdraw it. Pastify can't see or move Paster balances."],
             ["Will my old links redirect?", "No. Only Paster controls its links, so share your new Pastify links in their place."],
-            ["Do visitors have to wait long?", "No. Earning pastes use a short unlock of a few seconds. We don't use long countdowns to push sales."],
-            ["Is it free?", "Yes. Creators never pay. Pastify earns from sponsors shown during unlocks."],
+            ["Do visitors have to wait?", "No. Every paste opens straight away. Earning pastes show an ad beside the content instead of a countdown."],
+            ["Is it free?", "Yes. Creators never pay. Pastify earns from ads shown beside earning pastes."],
           ].map(([q, a]) => (
             <div key={q} className="card p-5">
               <p className="font-semibold">{q}</p>

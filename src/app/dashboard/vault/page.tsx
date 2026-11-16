@@ -131,7 +131,7 @@ export default async function VaultPage({ searchParams }: { searchParams: SP }) 
           <div className="flex flex-wrap gap-2">
             <div className="inline-flex rounded-lg border border-line bg-surface p-1 text-xs font-semibold">
               {["views", "unlocks", "earnings"].map((b) => (
-                <Link key={b} scroll={false} href={qs({ best: b })} className={`rounded-md px-3 py-1.5 capitalize ${best === b ? "bg-surface-2 text-paper" : "text-muted"}`}>{b}</Link>
+                <Link key={b} scroll={false} href={qs({ best: b })} className={`rounded-md px-3 py-1.5 capitalize ${best === b ? "bg-surface-2 text-paper" : "text-muted"}`}>{b === "unlocks" ? "paid views" : b}</Link>
               ))}
             </div>
             <PeriodTabs current={period} base="/dashboard/vault" extra={{ tab, best }} />
@@ -150,7 +150,7 @@ export default async function VaultPage({ searchParams }: { searchParams: SP }) 
                   <Link href={`/dashboard/stats/${t.id}`} className="mt-2 block truncate font-semibold hover:text-rose">{it?.t ?? "Deleted item"}</Link>
                   <div className="mt-3 grid grid-cols-3 gap-2 font-mono text-sm">
                     <span><span className="block text-[10px] uppercase tracking-wider text-muted">Views</span>{compact(t.views)}</span>
-                    <span><span className="block text-[10px] uppercase tracking-wider text-muted">Unlocks</span>{compact(t.unlocks)}</span>
+                    <span><span className="block text-[10px] uppercase tracking-wider text-muted">Paid</span>{compact(t.unlocks)}</span>
                     <span><span className="block text-[10px] uppercase tracking-wider text-muted">Earned</span>{usd(t.earnings)}</span>
                   </div>
                 </div>
@@ -183,7 +183,7 @@ export default async function VaultPage({ searchParams }: { searchParams: SP }) 
               <option value="new">Newest</option>
               <option value="old">Oldest</option>
               <option value="views">Most views</option>
-              <option value="unlocks">Most unlocks</option>
+              <option value="unlocks">Most paid views</option>
             </select>
             <button className="btn btn-secondary btn-sm">Apply</button>
           </form>
@@ -197,7 +197,7 @@ export default async function VaultPage({ searchParams }: { searchParams: SP }) 
                 <th className="px-3 font-semibold">Created</th>
                 <th className="px-3 font-semibold">14 days</th>
                 <th className="px-3 text-right font-semibold">Views</th>
-                <th className="px-3 text-right font-semibold">Unlocks</th>
+                <th className="px-3 text-right font-semibold">Paid</th>
                 <th className="pl-3 pr-4" />
               </tr>
             </thead>

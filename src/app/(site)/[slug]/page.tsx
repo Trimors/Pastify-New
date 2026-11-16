@@ -14,7 +14,8 @@ import { SITE_HOST, SITE_URL } from "@/lib/config";
 import { bytes, compact, relTime, shortDate, timeLeft } from "@/lib/format";
 import { CopyButton } from "@/components/CopyButton";
 import { EarningChip, VisibilityChip } from "@/components/Chips";
-import { UnlockGate } from "@/components/UnlockGate";
+import { AdSlot } from "@/components/AdSlot";
+import { PAID_VIEW_MIN_SECONDS, PAID_VIEW_POW_BITS, viewToken } from "@/lib/unlock";
 import { ViewBeacon } from "@/components/ViewBeacon";
 import { BurnGate, CodeBlock, PasswordGate, RichBlock } from "./Gates";
 import { PasteShortcuts, ShareButtons } from "./PasteTools";
@@ -58,9 +59,10 @@ export default async function PastePage({ params, searchParams }: Props) {
 
   const needsPassword = !!p.passwordHash && !isOwner && !(await hasGrant("pw", p.id));
   const premium = isPremium(user);
-  const needsUnlock = p.earning && !isOwner && !isAdmin && !premium && !(await hasGrant("u", p.id));
   const burnGate = p.burnAfterRead && !isOwner;
-  const showContent = !needsPassword && !needsUnlock && !burnGate;
+  const showContent = !needsPassword && !burnGate;
+  // Earning pastes open straight away; the creator is paid per unique view from the ad shown beside them.
+  const showAd = showContent && p.earning && !isOwner && !premium;
   const rich = p.format === "rich";
   const html = showContent && !rich ? await highlight(p.content, p.language) : null;
   const richHtml = showContent && rich ? sanitizeRich(p.content) : null;
@@ -139,8 +141,6 @@ export default async function PastePage({ params, searchParams }: Props) {
 
       {needsPassword ? (
         <PasswordGate slug={p.slug} />
-      ) : needsUnlock ? (
-        <UnlockGate kind="paste" slug={p.slug} premiumHref={paddleReady() ? `/premium?via=paste:${p.slug}` : undefined} />
       ) : burnGate ? (
         <BurnGate slug={p.slug} />
       ) : rich ? (
@@ -154,7 +154,18 @@ export default async function PastePage({ params, searchParams }: Props) {
         <PasteShortcuts url={url} copyText={showContent ? plain : null} editHref={isOwner ? `/dashboard/pastes/${p.id}` : canEditWithCode ? `/${p.slug}/edit` : null} rawHref={showContent ? `/${p.slug}/raw` : null} title={p.title} />
       </div>
 
-      {showContent && (!p.earning || premium) && !isOwner && <ViewBeacon slug={p.slug} />}
+      {showAd && (
+        <div className="mt-4">
+          <AdSlot />
+          {paddleReady() && (
+            <p className="mt-2 text-right text-xs text-muted">
+              <a href={`/premium?via=paste:${p.slug}`} className="hover:text-rose">Remove ads with Premium</a>
+            </p>
+          )}
+        </div>
+      )}
+
+      {showContent && !isOwner && <ViewBeacon slug={p.slug} token={p.earning && !premium ? viewToken(p.id) : undefined} minSeconds={PAID_VIEW_MIN_SECONDS} bits={PAID_VIEW_POW_BITS} />}
 
       {!isOwner && (
         <p className="mt-6 text-right text-xs text-muted">

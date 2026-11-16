@@ -36,7 +36,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       </Section>
 
       <div id="premium" className="scroll-mt-6">
-        <Section title="Premium" desc="Skip every unlock and see no ads.">
+        <Section title="Premium" desc="No ads, and link lockers open straight away.">
           {isPremium(user) ? (
             <div className="space-y-3 text-sm">
               <p>

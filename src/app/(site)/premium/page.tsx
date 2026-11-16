@@ -5,7 +5,7 @@ import { shortDate } from "@/lib/format";
 import { PremiumCheckout } from "@/components/PremiumCheckout";
 import { startCheckout } from "./actions";
 
-export const metadata = { title: "Premium", description: "Skip every unlock and see no ads on Pastify." };
+export const metadata = { title: "Premium", description: "No ads on Pastify, and link lockers open straight away." };
 
 type SP = Promise<{ via?: string; ref?: string }>;
 
@@ -21,8 +21,8 @@ export default async function PremiumPage({ searchParams }: { searchParams: SP }
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
       <p className="label !text-rose">Pastify Premium</p>
-      <h1 className="max-w-2xl text-5xl font-extrabold tracking-[-0.03em]">Skip every unlock.</h1>
-      <p className="mt-4 max-w-xl text-lg text-muted">Open any paste or link straight away, with no steps, no waiting and no ads. Part of every payment goes to the creator who brought you here.</p>
+      <h1 className="max-w-2xl text-5xl font-extrabold tracking-[-0.03em]">No ads. Anywhere.</h1>
+      <p className="mt-4 max-w-xl text-lg text-muted">Read every paste without ads, and open link lockers without steps. Part of every payment goes to the creator who brought you here.</p>
 
       {active ? (
         <div className="card mt-10 p-6">
@@ -46,7 +46,7 @@ export default async function PremiumPage({ searchParams }: { searchParams: SP }
 
       <section className="mt-14 grid gap-4 md:grid-cols-3">
         {[
-          ["No unlock steps", "Earning pastes and links open straight away."],
+          ["No locker steps", "Link lockers open straight away."],
           ["No ads", "No ad slots or sponsor pages while you browse."],
           ["Supports creators", `Creators get ${SHARE.basePct}–${SHARE.boostedPct}% of your plan's price.`],
         ].map(([t, d]) => (

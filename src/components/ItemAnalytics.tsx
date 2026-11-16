@@ -25,9 +25,9 @@ export async function ItemAnalytics({ ownerId, resourceId, period, metric, base 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {[
           ["Views", num(s.views)],
-          ["Unlocks", num(s.unlocks)],
+          ["Paid views", num(s.unlocks)],
           ["Earnings", usd(s.earnings)],
-          ["Unlock rate", pct(s.unlockRate)],
+          ["Paid view rate", pct(s.unlockRate)],
           ["CPM", usd(s.cpm)],
           ["Avg EPV", usd(s.epv, 4)],
         ].map(([k, v]) => (
@@ -41,7 +41,7 @@ export async function ItemAnalytics({ ownerId, resourceId, period, metric, base 
         <div className="mb-4 flex justify-end">
           <div className="inline-flex rounded-lg border border-line bg-ink p-1 text-xs font-semibold">
             {METRICS.map((x) => (
-              <Link key={x} scroll={false} href={{ pathname: base, query: { period, metric: x } }} className={`rounded-md px-3 py-1 capitalize ${m === x ? "bg-surface-2" : "text-muted"}`}>{x}</Link>
+              <Link key={x} scroll={false} href={{ pathname: base, query: { period, metric: x } }} className={`rounded-md px-3 py-1 capitalize ${m === x ? "bg-surface-2" : "text-muted"}`}>{x === "unlocks" ? "paid views" : x}</Link>
             ))}
           </div>
         </div>

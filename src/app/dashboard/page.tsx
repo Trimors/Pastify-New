@@ -14,7 +14,7 @@ export const metadata = { title: "Dashboard" };
 
 const METRICS = [
   { id: "views", label: "Views" },
-  { id: "unlocks", label: "Unlocks" },
+  { id: "unlocks", label: "Paid views" },
   { id: "earnings", label: "Earnings" },
 ] as const;
 
@@ -67,7 +67,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
         <div className="card relative overflow-hidden p-6">
           <div className="pointer-events-none absolute inset-0 bg-gradient opacity-[0.06]" />
           <p className="relative text-lg font-semibold">{sp.welcome ? "Account created." : "Nothing shared yet."} Make your first earning paste.</p>
-          <p className="relative mt-1 text-sm text-muted">Create a paste with Earning on and share it anywhere. Every unique unlock pays you.</p>
+          <p className="relative mt-1 text-sm text-muted">Create a paste with Earning on and share it anywhere. Every unique view pays you.</p>
           <div className="relative mt-4 flex flex-wrap gap-2">
             <Link href="/new" className="btn btn-primary btn-sm">Create paste</Link>
             <Link href="/switch" className="btn btn-secondary btn-sm">Moving from Paster?</Link>
@@ -87,10 +87,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <Kpi label="Views" value={num(stats.views)} />
-          <Kpi label="Unlocks" value={num(stats.unlocks)} />
+          <Kpi label="Paid views" value={num(stats.unlocks)} />
           <Kpi label="Earnings" value={usd(stats.earnings)} accent />
-          <Kpi label="Unlock rate" value={pct(stats.unlockRate)} />
-          <Kpi label="CPM" value={usd(stats.cpm)} hint="Per 1,000 unlocks" />
+          <Kpi label="Paid view rate" value={pct(stats.unlockRate)} />
+          <Kpi label="CPM" value={usd(stats.cpm)} hint="Per 1,000 paid views" />
           <Kpi label="Avg EPV" value={usd(stats.epv, 4)} hint="Earnings per view" />
         </div>
       </div>
