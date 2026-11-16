@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { SITE_NAME, SITE_URL } from "@/lib/config";
+import { GlassBackdrop } from "@/components/GlassBackdrop";
+import { GlassEffects } from "@/components/GlassEffects";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -19,7 +21,11 @@ export const viewport: Viewport = { themeColor: "#0B0710" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${mono.variable}`}>
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <GlassBackdrop />
+        <GlassEffects />
+        {children}
+      </body>
     </html>
   );
 }

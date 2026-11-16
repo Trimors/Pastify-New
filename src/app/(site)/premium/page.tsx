@@ -25,7 +25,7 @@ export default async function PremiumPage({ searchParams }: { searchParams: SP }
       <p className="mt-4 max-w-xl text-lg text-muted">Read every paste without ads. Part of every payment goes to the creator who brought you here.</p>
 
       {active ? (
-        <div className="card mt-10 p-6">
+        <div className="glass-brand mt-10 rounded-[1.6rem] p-6">
           <p className="font-semibold text-ok">You have Premium</p>
           <p className="mt-1 text-sm text-muted">Active until {shortDate(user!.premiumUntil!)}. Manage or cancel it from Settings.</p>
           <Link href="/dashboard/settings#premium" className="btn btn-secondary btn-sm mt-4">Manage Premium</Link>
@@ -50,7 +50,7 @@ export default async function PremiumPage({ searchParams }: { searchParams: SP }
           ["No ads", "No ad slots or sponsor pages while you browse."],
           ["Supports creators", `Creators get ${SHARE.basePct}–${SHARE.boostedPct}% of your plan's price.`],
         ].map(([t, d]) => (
-          <div key={t} className="card p-5">
+          <div key={t} className="glass-tile spot p-5">
             <p className="font-semibold">{t}</p>
             <p className="mt-1 text-sm text-muted">{d}</p>
           </div>

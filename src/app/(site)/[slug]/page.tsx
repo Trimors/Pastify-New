@@ -74,7 +74,7 @@ export default async function PastePage({ params, searchParams }: Props) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       {(created || saved) && (isOwner || editCode || saved) && (
-        <div className="card mb-6 space-y-3 border-magenta/40 p-4 fade-up">
+        <div className="glass-brand mb-6 space-y-3 rounded-2xl p-4 fade-up">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1">
               <p className="font-semibold">{created ? "Your paste is live" : "Changes saved"}</p>

@@ -7,7 +7,7 @@ type P = { slug: string; title: string; language: string; lineCount: number; vie
 
 export function PasteCard({ p }: { p: P }) {
   return (
-    <Link href={`/${p.slug}`} className="card group block p-4 transition-colors hover:border-[#4a3a57]">
+    <Link href={`/${p.slug}`} className="card spot lift group block p-4">
       <div className="flex items-start justify-between gap-3">
         <p className="truncate font-semibold group-hover:text-rose">{p.title}</p>
         {p.earning && <EarningChip />}

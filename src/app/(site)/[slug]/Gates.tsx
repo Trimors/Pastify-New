@@ -51,7 +51,7 @@ export function BurnGate({ slug }: { slug: string }) {
 
 export function CodeBlock({ html, content }: { html: string | null; content: string }) {
   return (
-    <div className="card code-view overflow-x-auto py-4">
+    <div className="card glass-deep code-view overflow-x-auto py-4">
       {html ? (
         <div dangerouslySetInnerHTML={{ __html: html }} />
       ) : (
@@ -71,5 +71,5 @@ export function CodeBlock({ html, content }: { html: string | null; content: str
 }
 
 export function RichBlock({ html }: { html: string }) {
-  return <div className="card rich-content rich-view px-6 py-5" dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div className="card glass-deep rich-content rich-view px-6 py-5" dangerouslySetInnerHTML={{ __html: html }} />;
 }

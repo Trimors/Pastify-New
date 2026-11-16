@@ -133,7 +133,7 @@ export function PasteEditor({ action, loggedIn, initial = {}, folders = [], temp
           aria-label="Title"
           className="w-full bg-transparent text-2xl font-bold tracking-tight outline-none placeholder:text-[#4d4058]"
         />
-        <div className="card overflow-hidden">
+        <div className="card glass-deep overflow-hidden">
           <div className="flex flex-wrap items-center gap-2 border-b border-line p-2">
             <div className="inline-flex rounded-lg border border-line bg-ink p-0.5 text-xs font-semibold" role="tablist" aria-label="Paste format">
               {(["code", "rich"] as const).map((f) => (

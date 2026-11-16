@@ -9,7 +9,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const user = await requireUser();
   return (
     <div className="lg:flex">
-      <aside className="border-b border-line bg-ink lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-60 lg:flex-col lg:border-b-0 lg:border-r">
+      <aside className="glass-bar border-b border-line lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-60 lg:flex-col lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between p-4 lg:block lg:p-5">
           <Logo href="/dashboard" />
           <Link href="/new" className="btn btn-primary btn-sm lg:mt-5 lg:w-full">New paste</Link>

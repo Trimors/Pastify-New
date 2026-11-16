@@ -76,11 +76,11 @@ export function PremiumCheckout({ plans, start, via, refCode, loggedIn, enabled,
         {plans.map((p) => {
           const best = p.id === "yearly";
           return (
-            <div key={p.id} className={`card relative flex flex-col p-6 ${best ? "border-magenta/50" : ""}`}>
+            <div key={p.id} className={`spot lift relative flex flex-col rounded-[1.6rem] p-6 ${best ? "glass-brand" : "glass-tile"}`}>
               {best && <span className="chip chip-earning absolute right-4 top-4">Best value</span>}
               <p className="label">{p.label}</p>
               <p className="font-mono text-4xl">${p.perMonth.toFixed(2)}<span className="text-base text-muted">/mo</span></p>
-              <p className="mt-1 flex-1 text-sm text-muted">
+              <p className={`mt-1 flex-1 text-sm ${best ? "text-white/80" : "text-muted"}`}>
                 {p.every === "month" ? "Billed monthly." : `$${p.billed.toFixed(2)} billed every ${p.every}.`} Renews at the same price. Cancel any time.
               </p>
               <button onClick={() => buy(p.id)} disabled={!!busy || !enabled || (loggedIn && !ready)} className={`btn mt-6 ${best ? "btn-primary" : "btn-secondary"}`}>
