@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { EXPIRY_OPTIONS } from "@/lib/pastes";
 import { PasteEditor } from "@/components/editor/PasteEditor";
-import { updatePasteAction } from "@/app/(site)/new/actions";
+import { cloneAction, loadTemplateAction, updatePasteAction } from "@/app/(site)/new/actions";
 
 export const metadata = { title: "Edit paste" };
 
@@ -13,7 +13,10 @@ export default async function EditPastePage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const p = await db.paste.findFirst({ where: { id, userId: user.id }, include: { folder: true } });
   if (!p) notFound();
-  const folders = await db.folder.findMany({ where: { userId: user.id }, select: { name: true } });
+  const [folders, templates] = await Promise.all([
+    db.folder.findMany({ where: { userId: user.id }, select: { name: true } }),
+    db.template.findMany({ where: { userId: user.id }, orderBy: { updatedAt: "desc" }, select: { id: true, title: true }, take: 50 }),
+  ]);
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-6 flex items-center gap-3">
@@ -24,6 +27,9 @@ export default async function EditPastePage({ params }: { params: Promise<{ id: 
       <PasteEditor
         mode="edit"
         action={updatePasteAction.bind(null, p.id)}
+        cloneAction={cloneAction}
+        loadTemplateAction={loadTemplateAction}
+        templates={templates}
         loggedIn
         folders={folders.map((f) => f.name)}
         expiryOptions={EXPIRY_OPTIONS.map(({ id, label }) => ({ id, label }))}
@@ -32,6 +38,7 @@ export default async function EditPastePage({ params }: { params: Promise<{ id: 
           filename: p.filename ?? "",
           language: p.language,
           content: p.content,
+          format: p.format === "rich" ? "rich" : "code",
           description: p.description ?? "",
           tags: p.tags.join(", "),
           visibility: p.visibility,

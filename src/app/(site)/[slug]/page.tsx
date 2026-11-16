@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { getUser } from "@/lib/auth";
 import { hasGrant } from "@/lib/grant";
 import { highlight } from "@/lib/highlight";
+import { richToText, sanitizeRich } from "@/lib/rich";
 import { isExpired } from "@/lib/pastes";
+import { isPremium, paddleReady } from "@/lib/premium";
 import { languageLabel } from "@/lib/languages";
 import { SITE_HOST, SITE_URL } from "@/lib/config";
 import { bytes, compact, relTime, shortDate, timeLeft } from "@/lib/format";
 import { CopyButton } from "@/components/CopyButton";
 import { EarningChip, VisibilityChip } from "@/components/Chips";
-import { UnlockGate } from "@/components/UnlockGate";
+import { AdSlot } from "@/components/AdSlot";
+import { PAID_VIEW_MIN_SECONDS, PAID_VIEW_POW_BITS, viewToken } from "@/lib/views";
 import { ViewBeacon } from "@/components/ViewBeacon";
-import { BurnGate, CodeBlock, PasswordGate } from "./Gates";
+import { BurnGate, CodeBlock, PasswordGate, RichBlock } from "./Gates";
+import { PasteShortcuts, ShareButtons } from "./PasteTools";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ created?: string; saved?: string }> };
 
@@ -25,7 +30,8 @@ async function load(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = await load((await params).slug);
   if (!p || p.status !== "ACTIVE" || p.visibility === "PRIVATE") return { title: "Paste" };
-  const desc = p.description || `${p.lineCount} lines · ${languageLabel(p.language)} · ${p.visibility.toLowerCase()}`;
+  const kind = p.format === "rich" ? "Rich text" : languageLabel(p.language);
+  const desc = p.description || `${p.lineCount} lines · ${kind} · ${p.visibility.toLowerCase()}`;
   return {
     title: p.title,
     description: desc,
@@ -52,21 +58,39 @@ export default async function PastePage({ params, searchParams }: Props) {
   }
 
   const needsPassword = !!p.passwordHash && !isOwner && !(await hasGrant("pw", p.id));
-  const needsUnlock = p.earning && !isOwner && !isAdmin && !(await hasGrant("u", p.id));
+  const premium = isPremium(user);
   const burnGate = p.burnAfterRead && !isOwner;
-  const showContent = !needsPassword && !needsUnlock && !burnGate;
-  const html = showContent ? await highlight(p.content, p.language) : null;
+  const showContent = !needsPassword && !burnGate;
+  // Earning pastes open straight away; the creator is paid per unique view from the ad shown beside them.
+  const showAd = showContent && p.earning && !isOwner && !premium;
+  const rich = p.format === "rich";
+  const html = showContent && !rich ? await highlight(p.content, p.language) : null;
+  const richHtml = showContent && rich ? sanitizeRich(p.content) : null;
+  const plain = showContent ? (rich ? richToText(p.content) : p.content) : "";
   const url = `${SITE_URL}/${p.slug}`;
+  const editCode = created ? (await cookies()).get(`pf_ec_${p.slug}`)?.value : undefined;
+  const canEditWithCode = !isOwner && !!p.editCodeHash;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      {(created || saved) && isOwner && (
-        <div className="card mb-6 flex flex-wrap items-center gap-4 border-magenta/40 p-4 fade-up">
-          <div className="flex-1">
-            <p className="font-semibold">{created ? "Your paste is live" : "Changes saved"}</p>
-            <p className="font-mono text-sm text-muted">{SITE_HOST}/{p.slug}</p>
+      {(created || saved) && (isOwner || editCode || saved) && (
+        <div className="card mb-6 space-y-3 border-magenta/40 p-4 fade-up">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex-1">
+              <p className="font-semibold">{created ? "Your paste is live" : "Changes saved"}</p>
+              <p className="font-mono text-sm text-muted">{SITE_HOST}/{p.slug}</p>
+            </div>
+            <CopyButton text={url} label="Copy link" className="btn btn-primary btn-sm" />
           </div>
-          <CopyButton text={url} label="Copy link" className="btn btn-primary btn-sm" />
+          {editCode && (
+            <div className="flex flex-wrap items-center gap-3 rounded-lg border border-warn/30 bg-warn/10 p-3 text-sm">
+              <span className="flex-1">
+                <span className="font-semibold text-warn">Save your edit code.</span> You need it to edit this paste later. It won&apos;t be shown again.
+              </span>
+              <code className="rounded bg-ink px-2 py-1 font-mono">{editCode}</code>
+              <CopyButton text={editCode} label="Copy code" />
+            </div>
+          )}
         </div>
       )}
 
@@ -90,7 +114,7 @@ export default async function PastePage({ params, searchParams }: Props) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {showContent && <CopyButton text={p.content} label="Copy" />}
+          {showContent && <CopyButton text={plain} label="Copy" />}
           {showContent && (
             <a href={`/${p.slug}/raw`} className="btn btn-secondary btn-sm">Raw</a>
           )}
@@ -99,12 +123,13 @@ export default async function PastePage({ params, searchParams }: Props) {
           )}
           <CopyButton text={url} label="Copy link" />
           {isOwner && <Link href={`/dashboard/pastes/${p.id}`} className="btn btn-secondary btn-sm">Edit</Link>}
+          {canEditWithCode && <Link href={`/${p.slug}/edit`} className="btn btn-ghost btn-sm">Edit</Link>}
         </div>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs text-muted">
         {p.filename && <span>{p.filename}</span>}
-        <span>{languageLabel(p.language)}</span>
+        <span>{rich ? "Rich text" : languageLabel(p.language)}</span>
         <span>{p.lineCount} lines</span>
         <span>{bytes(p.sizeBytes)}</span>
         <span>{compact(p.views)} views</span>
@@ -116,15 +141,31 @@ export default async function PastePage({ params, searchParams }: Props) {
 
       {needsPassword ? (
         <PasswordGate slug={p.slug} />
-      ) : needsUnlock ? (
-        <UnlockGate kind="paste" slug={p.slug} />
       ) : burnGate ? (
         <BurnGate slug={p.slug} />
+      ) : rich ? (
+        <RichBlock html={richHtml ?? ""} />
       ) : (
         <CodeBlock html={html} content={p.content} />
       )}
 
-      {showContent && !p.earning && !isOwner && <ViewBeacon slug={p.slug} />}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <ShareButtons url={url} title={p.title} />
+        <PasteShortcuts url={url} copyText={showContent ? plain : null} editHref={isOwner ? `/dashboard/pastes/${p.id}` : canEditWithCode ? `/${p.slug}/edit` : null} rawHref={showContent ? `/${p.slug}/raw` : null} title={p.title} />
+      </div>
+
+      {showAd && (
+        <div className="mt-4">
+          <AdSlot />
+          {paddleReady() && (
+            <p className="mt-2 text-right text-xs text-muted">
+              <a href={`/premium?via=paste:${p.slug}`} className="hover:text-rose">Remove ads with Premium</a>
+            </p>
+          )}
+        </div>
+      )}
+
+      {showContent && !isOwner && <ViewBeacon slug={p.slug} token={p.earning && !premium ? viewToken(p.id) : undefined} minSeconds={PAID_VIEW_MIN_SECONDS} bits={PAID_VIEW_POW_BITS} />}
 
       {!isOwner && (
         <p className="mt-6 text-right text-xs text-muted">

@@ -24,9 +24,9 @@ export function periodStart(id: string): { since: Date | null; days: number } {
   return { since: d, days: p.days };
 }
 
-export async function overview(ownerId: string, period: string) {
+export async function overview(ownerId: string, period: string, resourceId?: string) {
   const { since } = periodStart(period);
-  const where: Prisma.ViewEventWhereInput = { ownerId, ...(since ? { createdAt: { gte: since } } : {}) };
+  const where: Prisma.ViewEventWhereInput = { ownerId, ...(resourceId ? { resourceId } : {}), ...(since ? { createdAt: { gte: since } } : {}) };
   const [views, unlocks, earn] = await Promise.all([
     db.viewEvent.count({ where }),
     db.viewEvent.count({ where: { ...where, unlocked: true } }),
@@ -46,10 +46,11 @@ export async function overview(ownerId: string, period: string) {
 
 export type SeriesPoint = { day: string; views: number; unlocks: number; earnings: number };
 
-export async function series(ownerId: string, period: string): Promise<SeriesPoint[]> {
+export async function series(ownerId: string, period: string, resourceId?: string): Promise<SeriesPoint[]> {
+  const rf = resourceId ? Prisma.sql`AND "resourceId" = ${resourceId}` : Prisma.empty;
   let { since, days } = periodStart(period);
   if (!since) {
-    const first = await db.viewEvent.findFirst({ where: { ownerId }, orderBy: { createdAt: "asc" }, select: { createdAt: true } });
+    const first = await db.viewEvent.findFirst({ where: { ownerId, ...(resourceId ? { resourceId } : {}) }, orderBy: { createdAt: "asc" }, select: { createdAt: true } });
     since = first ? new Date(first.createdAt) : new Date();
     since.setUTCHours(0, 0, 0, 0);
     days = Math.max(1, Math.ceil((Date.now() - since.getTime()) / 864e5));
@@ -58,7 +59,7 @@ export async function series(ownerId: string, period: string): Promise<SeriesPoi
     // hourly buckets for today
     const rows = await db.$queryRaw<{ b: Date; v: bigint; u: bigint; e: bigint | null }[]>`
       SELECT date_trunc('hour', "createdAt") AS b, count(*) AS v, count(*) FILTER (WHERE unlocked) AS u, sum("earningMicros") AS e
-      FROM "ViewEvent" WHERE "ownerId" = ${ownerId} AND "createdAt" >= ${since} GROUP BY 1 ORDER BY 1`;
+      FROM "ViewEvent" WHERE "ownerId" = ${ownerId} ${rf} AND "createdAt" >= ${since} GROUP BY 1 ORDER BY 1`;
     const map = new Map(rows.map((r) => [new Date(r.b).getUTCHours(), r]));
     return Array.from({ length: 24 }, (_, h) => {
       const r = map.get(h);
@@ -67,7 +68,7 @@ export async function series(ownerId: string, period: string): Promise<SeriesPoi
   }
   const rows = await db.$queryRaw<{ b: Date; v: bigint; u: bigint; e: bigint | null }[]>`
     SELECT date_trunc('day', "createdAt") AS b, count(*) AS v, count(*) FILTER (WHERE unlocked) AS u, sum("earningMicros") AS e
-    FROM "ViewEvent" WHERE "ownerId" = ${ownerId} AND "createdAt" >= ${since} GROUP BY 1 ORDER BY 1`;
+    FROM "ViewEvent" WHERE "ownerId" = ${ownerId} ${rf} AND "createdAt" >= ${since} GROUP BY 1 ORDER BY 1`;
   const map = new Map(rows.map((r) => [new Date(r.b).toISOString().slice(0, 10), r]));
   return Array.from({ length: days }, (_, i) => {
     const d = new Date(since!.getTime() + i * 864e5).toISOString().slice(0, 10);
@@ -78,11 +79,11 @@ export async function series(ownerId: string, period: string): Promise<SeriesPoi
 
 type Dim = "country" | "device" | "browser" | "source" | "referrerDomain" | "resourceId";
 
-export async function breakdown(ownerId: string, period: string, dim: Dim, take = 8) {
+export async function breakdown(ownerId: string, period: string, dim: Dim, take = 8, resourceId?: string) {
   const { since } = periodStart(period);
   const rows = await db.viewEvent.groupBy({
     by: [dim],
-    where: { ownerId, ...(since ? { createdAt: { gte: since } } : {}), ...(dim === "referrerDomain" ? { referrerDomain: { not: null } } : {}) },
+    where: { ownerId, ...(resourceId ? { resourceId } : {}), ...(since ? { createdAt: { gte: since } } : {}), ...(dim === "referrerDomain" ? { referrerDomain: { not: null } } : {}) },
     _count: { _all: true },
     _sum: { earningMicros: true },
     orderBy: { _count: { id: "desc" } },

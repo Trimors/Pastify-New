@@ -13,6 +13,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   return ogCard({
     title: p.title,
     meta: `${p.lineCount} lines · ${languageLabel(p.language)} · ${p.visibility.toLowerCase()}`,
-    badge: p.earning ? "Unlock to view" : undefined,
+    badge: undefined,
   });
 }

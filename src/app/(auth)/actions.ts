@@ -51,7 +51,8 @@ export async function signup(_: AuthState, form: FormData): Promise<AuthState> {
     },
   });
   await createSession(user.id);
-  redirect("/dashboard?welcome=1");
+  const next = String(form.get("next") || "");
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard?welcome=1");
 }
 
 export async function login(_: AuthState, form: FormData): Promise<AuthState> {

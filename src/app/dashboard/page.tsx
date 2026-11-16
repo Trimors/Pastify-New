@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { breakdown, overview, series, PERIODS } from "@/lib/stats";
-import { balanceOf } from "@/lib/unlock";
+import { balanceOf } from "@/lib/views";
 import { usd } from "@/lib/money";
 import { compact, num, pct, dayMonth } from "@/lib/format";
 import { countryName, flag } from "@/lib/geo";
@@ -14,7 +14,7 @@ export const metadata = { title: "Dashboard" };
 
 const METRICS = [
   { id: "views", label: "Views" },
-  { id: "unlocks", label: "Unlocks" },
+  { id: "unlocks", label: "Paid views" },
   { id: "earnings", label: "Earnings" },
 ] as const;
 
@@ -36,22 +36,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
     breakdown(user.id, period, "device"),
     breakdown(user.id, period, "browser"),
     breakdown(user.id, period, "resourceId", 6),
-    Promise.all([db.paste.count({ where: { userId: user.id } }), db.locker.count({ where: { userId: user.id } })]),
+    db.paste.count({ where: { userId: user.id } }),
   ]);
 
   const ids = top.map((t) => t.key);
-  const [pastes, lockers] = await Promise.all([
-    db.paste.findMany({ where: { id: { in: ids } }, select: { id: true, title: true, slug: true } }),
-    db.locker.findMany({ where: { id: { in: ids } }, select: { id: true, title: true, slug: true } }),
-  ]);
-  const titles = new Map([...pastes.map((p) => [p.id, { t: p.title, href: `/${p.slug}` }] as const), ...lockers.map((l) => [l.id, { t: l.title, href: `/l/${l.slug}` }] as const)]);
+  const pastes = await db.paste.findMany({ where: { id: { in: ids } }, select: { id: true, title: true, slug: true } });
+  const titles = new Map(pastes.map((p) => [p.id, { t: p.title, href: `/${p.slug}` }] as const));
 
   const chartData = points.map((p) => ({
     label: period === "today" ? p.day : dayMonth(new Date(p.day)),
     value: metric === "earnings" ? p.earnings / 1e6 : p[metric],
   }));
   const fmt = metric === "earnings" ? (n: number) => `$${n.toFixed(2)}` : (n: number) => compact(n);
-  const empty = counts[0] + counts[1] === 0;
+  const empty = counts === 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -66,11 +63,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
       {(sp.welcome || empty) && (
         <div className="card relative overflow-hidden p-6">
           <div className="pointer-events-none absolute inset-0 bg-gradient opacity-[0.06]" />
-          <p className="relative text-lg font-semibold">{sp.welcome ? "Account created." : "Nothing shared yet."} Make your first earning link.</p>
-          <p className="relative mt-1 text-sm text-muted">Create a paste with Earning on, or lock any link. Share it anywhere and every unique unlock pays you.</p>
+          <p className="relative text-lg font-semibold">{sp.welcome ? "Account created." : "Nothing shared yet."} Make your first earning paste.</p>
+          <p className="relative mt-1 text-sm text-muted">Create a paste with Earning on and share it anywhere. Every unique view pays you.</p>
           <div className="relative mt-4 flex flex-wrap gap-2">
             <Link href="/new" className="btn btn-primary btn-sm">Create paste</Link>
-            <Link href="/dashboard/lockers/new" className="btn btn-secondary btn-sm">Lock a link</Link>
+            <Link href="/switch" className="btn btn-secondary btn-sm">Moving from Paster?</Link>
             <Link href="/earn" className="btn btn-ghost btn-sm">See rates</Link>
           </div>
         </div>
@@ -87,10 +84,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <Kpi label="Views" value={num(stats.views)} />
-          <Kpi label="Unlocks" value={num(stats.unlocks)} />
+          <Kpi label="Paid views" value={num(stats.unlocks)} />
           <Kpi label="Earnings" value={usd(stats.earnings)} accent />
-          <Kpi label="Unlock rate" value={pct(stats.unlockRate)} />
-          <Kpi label="CPM" value={usd(stats.cpm)} hint="Per 1,000 unlocks" />
+          <Kpi label="Paid view rate" value={pct(stats.unlockRate)} />
+          <Kpi label="CPM" value={usd(stats.cpm)} hint="Per 1,000 paid views" />
           <Kpi label="Avg EPV" value={usd(stats.epv, 4)} hint="Earnings per view" />
         </div>
       </div>

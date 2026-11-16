@@ -23,14 +23,10 @@ export async function visitor(): Promise<VisitorInfo> {
     .update(`${process.env.AUTH_SECRET}|${day}|${ip}|${ua}`)
     .digest("hex")
     .slice(0, 32);
-  const country = (
-    h.get("cf-ipcountry") ||
-    h.get("x-vercel-ip-country") ||
-    h.get("x-country-code") ||
-    "XX"
-  )
-    .toUpperCase()
-    .slice(0, 2);
+  // Only trust the geo header your edge sets (GEO_HEADER), otherwise visitors could pick their own rate tier.
+  const geoHeader = process.env.GEO_HEADER?.toLowerCase();
+  const raw = geoHeader ? h.get(geoHeader) : null;
+  const country = raw && /^[A-Za-z]{2}$/.test(raw) ? raw.toUpperCase() : "XX";
   return { hash, country, device: device(ua), browser: browser(ua), isBot: !ua || BOT_RE.test(ua), userAgent: ua };
 }
 

@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  output: process.env.STANDALONE === "1" ? "standalone" : undefined,
   serverExternalPackages: ["shiki"],
   async headers() {
     return [

@@ -10,7 +10,7 @@ export function SiteFooter() {
           <p className="text-sm text-muted">Paste. Share. Earn.</p>
           <p className="font-mono text-[10px] tracking-[0.25em] text-muted/70">ENGINEERED BY TRIMORS TECHNOLOGIES</p>
         </div>
-        <FooterCol title="Product" links={[["New paste", "/new"], ["Explore", "/explore"], ["Pricing", "/pricing"], ["API", "/docs/api"]]} />
+        <FooterCol title="Product" links={[["New paste", "/new"], ["Explore", "/explore"], ["Pricing", "/pricing"], ["API", "/docs/api"], ["Moving from Paster", "/switch"]]} />
         <FooterCol title="Creators" links={[["Earn", "/earn"], ["Rates", "/earn#rates"], ["Dashboard", "/dashboard"], ["Referrals", "/dashboard/referrals"]]} />
         <FooterCol title="Legal" links={[["Terms", "/legal/terms"], ["Privacy", "/legal/privacy"], ["Content policy", "/legal/content"], ["Report abuse", "/report"]]} />
       </div>

@@ -28,6 +28,7 @@ enum ContentStatus {
   REMOVED
 }
 
+/// LOCKER is kept only so data from before link lockers were removed stays valid.
 enum ResourceKind {
   PASTE
   LOCKER
@@ -39,6 +40,8 @@ enum LedgerType {
   PAYOUT
   PAYOUT_REVERSAL
   ADJUSTMENT
+  PREMIUM_SALE
+  PREMIUM_REFUND
 }
 
 enum PayoutStatus {
@@ -70,6 +73,8 @@ model User {
   referrals         User[]        @relation("Referrals")
   payoutMethod      String?
   payoutDestination String?
+  /// Visitor Premium: no ads until this time.
+  premiumUntil      DateTime?
   emailOnPayout     Boolean       @default(true)
   emailOnReport     Boolean       @default(true)
   createdAt         DateTime      @default(now())
@@ -79,7 +84,8 @@ model User {
   apiKeys  ApiKey[]
   pastes   Paste[]
   folders  Folder[]
-  lockers  Locker[]
+  templates Template[]
+  subscriptions Subscription[] @relation("SubscriptionBuyer")
   ledger   LedgerEntry[]
   payouts  Payout[]
 }
@@ -130,7 +136,11 @@ model Paste {
   title         String
   filename      String?
   language      String        @default("text")
+  /// "code" = plain text with syntax highlighting, "rich" = sanitized HTML from the rich editor
+  format        String        @default("code")
   content       String
+  /// bcrypt hash of the edit code; lets anyone holding the code edit the paste without an account
+  editCodeHash  String?
   description   String?
   tags          String[]
   visibility    Visibility    @default(PUBLIC)
@@ -148,26 +158,6 @@ model Paste {
 
   @@index([userId, createdAt])
   @@index([visibility, status, createdAt])
-}
-
-model Locker {
-  id           String        @id @default(cuid())
-  slug         String        @unique
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title        String
-  description  String?
-  targetUrl    String
-  // "light" = 1 step, "standard" = 2 steps, "heavy" = 3 steps
-  intensity    String        @default("standard")
-  waitSeconds  Int           @default(0)
-  status       ContentStatus @default(ACTIVE)
-  views        Int           @default(0)
-  unlocks      Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-
-  @@index([userId, createdAt])
 }
 
 model ViewEvent {
@@ -188,25 +178,6 @@ model ViewEvent {
 
   @@index([ownerId, createdAt])
   @@index([resourceId, visitorHash, createdAt])
-}
-
-model UnlockSession {
-  id          String       @id @default(cuid())
-  kind        ResourceKind
-  resourceId  String
-  viewEventId String?
-  visitorHash String
-  // JSON array of { kind, seconds }
-  steps       Json
-  stepIndex   Int          @default(0)
-  stepStarted DateTime     @default(now())
-  powSalt     String
-  powBits     Int
-  powSolved   Boolean      @default(false)
-  completedAt DateTime?
-  createdAt   DateTime     @default(now())
-
-  @@index([visitorHash, createdAt])
 }
 
 model LedgerEntry {
@@ -255,4 +226,62 @@ model RateLimit {
   key       String   @id
   count     Int
   resetAt   DateTime
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  format    String   @default("rich")
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt])
+}
+
+/// A Paddle subscription for visitor Premium.
+model Subscription {
+  id               String    @id // Paddle subscription id (sub_…)
+  userId           String
+  user             User      @relation("SubscriptionBuyer", fields: [userId], references: [id], onDelete: Cascade)
+  /// Creator credited for this subscription's sales and renewals (null = no creator).
+  creatorId        String?
+  paddleCustomerId String?
+  plan             String
+  status           String
+  currentPeriodEnd DateTime?
+  cancelAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([creatorId])
+}
+
+/// One paid Premium transaction (first payment or renewal) and the creator's share of it.
+model PremiumSale {
+  id              String   @id // Paddle transaction id (txn_…)
+  subscriptionId  String?
+  buyerId         String?
+  creatorId       String?
+  plan            String
+  renewal         Boolean  @default(false)
+  currency        String
+  grossCents      Int
+  netCents        Int
+  sharePct        Int
+  shareMicros     BigInt
+  refundedMicros  BigInt   @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([creatorId, createdAt])
+}
+
+/// Paddle webhook ids already processed, so retries are ignored.
+model WebhookEvent {
+  id         String   @id
+  type       String
+  receivedAt DateTime @default(now())
 }

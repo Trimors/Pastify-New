@@ -16,7 +16,7 @@ export function PasswordGate({ slug }: { slug: string }) {
 }
 
 export function BurnGate({ slug }: { slug: string }) {
-  const [data, setData] = useState<{ content?: string; html?: string | null; error?: string } | null>(null);
+  const [data, setData] = useState<{ content?: string; html?: string | null; rich?: boolean; error?: string } | null>(null);
   const [pending, setPending] = useState(false);
   if (data?.content !== undefined) {
     return (
@@ -25,7 +25,7 @@ export function BurnGate({ slug }: { slug: string }) {
           <span>This paste is now deleted. Copy anything you need before leaving.</span>
           <CopyButton text={data.content} />
         </div>
-        <CodeBlock html={data.html ?? null} content={data.content} />
+        {data.rich ? <RichBlock html={data.html ?? ""} /> : <CodeBlock html={data.html ?? null} content={data.content} />}
       </div>
     );
   }
@@ -68,4 +68,8 @@ export function CodeBlock({ html, content }: { html: string | null; content: str
       )}
     </div>
   );
+}
+
+export function RichBlock({ html }: { html: string }) {
+  return <div className="card rich-content rich-view px-6 py-5" dangerouslySetInnerHTML={{ __html: html }} />;
 }
