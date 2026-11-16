@@ -25,7 +25,7 @@ export const EARN = {
 } as const;
 
 /**
- * Creator CPM (USD paid to the creator per 1,000 unique paid views or locker unlocks) by tier.
+ * Creator CPM (USD paid to the creator per 1,000 unique paid views) by tier.
  * These are shown on the public rates page, so keep them honest.
  */
 export const RATE_TIERS = [
@@ -54,7 +54,7 @@ export function tierFor(country: string) {
   return RATE_TIERS.find((t) => (t.countries as readonly string[]).includes(country)) ?? RATE_TIERS[RATE_TIERS.length - 1];
 }
 
-/** Earning for one unique paid view or unlock in micro-dollars (1 USD = 1,000,000). */
+/** Earning for one unique paid view in micro-dollars (1 USD = 1,000,000). */
 export function earningMicrosFor(country: string): bigint {
   return BigInt(Math.round((tierFor(country).cpm / 1000) * 1_000_000));
 }

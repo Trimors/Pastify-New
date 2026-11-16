@@ -1,7 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { EARN } from "@/lib/config";
-import { balanceOf } from "@/lib/unlock";
+import { balanceOf } from "@/lib/views";
 import { usd, MICROS } from "@/lib/money";
 import { shortDate } from "@/lib/format";
 import { CashoutForm, PayoutMethodForm } from "@/components/EarningsForms";

@@ -12,13 +12,12 @@ async function submit(form: FormData) {
   const ip = await clientIp();
   if (!(await rateLimit(`report:${ip}`, 10, 3600))) redirect("/report?sent=limit");
   const raw = String(form.get("slug") || "").trim();
-  const isLocker = /\/l\//.test(raw) || form.get("kind") === "locker";
-  const slug = raw.replace(/^https?:\/\/[^/]+/, "").replace(/^\/(l\/)?/, "").split(/[/?#]/)[0];
+  const slug = raw.replace(/^https?:\/\/[^/]+/, "").replace(/^\//, "").split(/[/?#]/)[0];
   const reason = String(form.get("reason") || "");
   if (!slug || !REASONS.includes(reason)) redirect("/report?sent=invalid");
   await db.report.create({
     data: {
-      kind: isLocker ? "LOCKER" : "PASTE",
+      kind: "PASTE",
       slug: slug.slice(0, 32),
       reason,
       details: String(form.get("details") || "").slice(0, 2000) || null,

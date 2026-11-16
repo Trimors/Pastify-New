@@ -9,9 +9,9 @@ const PAGES: Record<string, { title: string; body: [string, string][] }> = {
     body: [
       ["Who can use Pastify", `You must be 18 or older to create an account. One account per person unless we agree otherwise in writing.`],
       ["Your content", `You own what you post. You give ${SITE_NAME} permission to store, display and deliver it so the service works. You are responsible for having the right to share it.`],
-      ["Earning", `Creators earn for unique, human views of earning pastes (and unlocks of link lockers) at the rates on the Earn page. Rates can change; we post changes there first. Earnings from invalid traffic (bots, scripts, paid or incentivised clicks, self-clicks) are not paid and may be reversed.`],
+      ["Earning", `Creators earn for unique, human views of earning pastes at the rates on the Earn page. Rates can change; we post changes there first. Earnings from invalid traffic (bots, scripts, paid or incentivised clicks, self-clicks) are not paid and may be reversed.`],
       ["Payouts", `Cashouts are available from $${EARN.payoutMinimumUsd}. We aim to pay within ${EARN.payoutTargetDays} business days. We may ask you to verify your identity before paying. If we reject a cashout, the amount goes back to your balance and we tell you why.`],
-      ["Premium", "Premium is a subscription for visitors that removes ads and skips link locker steps. Paddle.com is our reseller and merchant of record: it processes payments, charges any tax and issues receipts. Plans renew automatically at the price shown at checkout until cancelled. You can cancel any time from Settings; you keep Premium until the end of the period you paid for."],
+      ["Premium", "Premium is a subscription for visitors that removes ads. Paddle.com is our reseller and merchant of record: it processes payments, charges any tax and issues receipts. Plans renew automatically at the price shown at checkout until cancelled. You can cancel any time from Settings; you keep Premium until the end of the period you paid for."],
       ["Refunds", "If Premium doesn't work for you, ask for a refund within 14 days of a payment and we'll refund it. Refunds are processed by Paddle. A full refund ends Premium access."],
       ["Premium sales for creators", "Creators get 50% of the plan price (before tax) for Premium sales and renewals they bring in, and 70% from their 6th sale in a UTC day. Refunded or charged-back sales are taken back from the creator's balance in proportion."],
       ["Suspension", "We can suspend accounts that break these terms or the content policy. When we do, we tell you which rule was broken. Earnings from legitimate traffic before a suspension for unrelated reasons are still paid."],
@@ -34,9 +34,9 @@ const PAGES: Record<string, { title: string; body: [string, string][] }> = {
     title: "Content Policy",
     body: [
       ["Not allowed", "Malware, phishing, credential stealers or anything that harms visitors' devices or accounts. Illegal content of any kind, including any sexual content involving minors. Other people's private data (doxxing). Content that infringes copyright. Spam, scams and fake giveaways."],
-      ["Traffic", "No bots, automated unlocks, paid-to-click traffic, or tricking people into unlocking. Don't lock links that just lead to another locker."],
+      ["Traffic", "No bots, automated or fake views, paid-to-click traffic, or tricking people into opening pastes."],
       ["What happens", "We remove content that breaks these rules. Earnings from removed content are not paid. Repeated or serious breaks lead to suspension."],
-      ["Reporting", "Use the Report link on any paste or locker, or the Report abuse page. We review every report."],
+      ["Reporting", "Use the Report link on any paste, or the Report abuse page. We review every report."],
     ],
   },
 };

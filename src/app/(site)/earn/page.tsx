@@ -7,7 +7,7 @@ export const metadata = { title: "Earn", description: "Published rates, clear pa
 const FAQ: [string, string][] = [
   ["How do Premium sales pay?", "Visitors can buy Premium to remove ads. When they buy from one of your pastes or your Premium link, you get 50% of the plan price (before tax) from that sale and every renewal, and 70% from your 6th sale of the day (UTC). Premium visitors open your pastes without unlocking, so those views don't add unlock earnings."],
   ["What counts as a paid view?", `A real visitor who keeps your earning paste open for a few seconds. Pastes open straight away, with no steps. Each visitor counts once per paste every ${EARN.uniqueWindowHours} hours. Bots, scripts and your own visits don't count.`],
-  ["What do visitors have to do?", "A short check, then usually a sponsor visit. You pick Light, Standard or Heavy steps for each locker. Earning pastes use Standard."],
+  ["What do visitors have to do?", "Nothing. Every paste opens straight away. Earning pastes show an ad beside the content, and that ad pays you."],
   ["When do I get paid?", `Request a cashout from $${EARN.payoutMinimumUsd}. We aim to pay within ${EARN.payoutTargetDays} business days and show every request's status in your dashboard.`],
   ["How do I get paid?", `${EARN.payoutMethods.map((m) => m.label).join(", ")}.`],
   ["Do referrals pay?", `Yes. You get ${EARN.referralRate * 100}% of what creators you invite earn, for as long as they earn. It's paid by Pastify, not taken from them.`],

@@ -25,10 +25,10 @@ export default function PricingPage() {
           <p className="font-mono text-4xl">$0</p>
           <ul className="relative mt-5 space-y-2 text-sm text-muted">
             <li>Everything for anyone, plus private pastes and folders</li>
-            <li>Earning pastes, templates and link lockers</li>
+            <li>Earning pastes and templates</li>
             <li>Full analytics: countries, sources, devices</li>
             <li>Cashouts by PayPal or crypto</li>
-            <li>REST API, bulk lockers, referrals</li>
+            <li>REST API and referrals</li>
             <li>Two-factor sign-in</li>
           </ul>
           <Link href="/signup" className="btn btn-primary relative mt-6">Create account</Link>
@@ -37,7 +37,7 @@ export default function PricingPage() {
       <div className="card mt-4 flex flex-wrap items-center justify-between gap-4 p-6">
         <div>
           <p className="label">Visitors</p>
-          <p className="text-lg font-semibold">Premium: no ads, no locker steps</p>
+          <p className="text-lg font-semibold">Premium: no ads</p>
           <p className="text-sm text-muted">From $2.99/month on the yearly plan. Creators get 50–70% of the price.</p>
         </div>
         <Link href="/premium" className="btn btn-secondary">See Premium</Link>

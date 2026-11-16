@@ -11,12 +11,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const now = Date.now();
-  const [pastes, unlocks, limits, sessions] = await Promise.all([
+  const [pastes, limits, sessions] = await Promise.all([
     // Expired pastes are kept 7 days so owners can still copy them, then deleted.
     db.paste.deleteMany({ where: { expiresAt: { lt: new Date(now - 7 * 864e5) } } }),
-    db.unlockSession.deleteMany({ where: { createdAt: { lt: new Date(now - 2 * 864e5) } } }),
     db.rateLimit.deleteMany({ where: { resetAt: { lt: new Date(now) } } }),
     db.session.deleteMany({ where: { expiresAt: { lt: new Date(now) } } }),
   ]);
-  return NextResponse.json({ deleted: { pastes: pastes.count, unlockSessions: unlocks.count, rateLimits: limits.count, sessions: sessions.count } });
+  return NextResponse.json({ deleted: { pastes: pastes.count, rateLimits: limits.count, sessions: sessions.count } });
 }

@@ -15,7 +15,7 @@ import { bytes, compact, relTime, shortDate, timeLeft } from "@/lib/format";
 import { CopyButton } from "@/components/CopyButton";
 import { EarningChip, VisibilityChip } from "@/components/Chips";
 import { AdSlot } from "@/components/AdSlot";
-import { PAID_VIEW_MIN_SECONDS, PAID_VIEW_POW_BITS, viewToken } from "@/lib/unlock";
+import { PAID_VIEW_MIN_SECONDS, PAID_VIEW_POW_BITS, viewToken } from "@/lib/views";
 import { ViewBeacon } from "@/components/ViewBeacon";
 import { BurnGate, CodeBlock, PasswordGate, RichBlock } from "./Gates";
 import { PasteShortcuts, ShareButtons } from "./PasteTools";

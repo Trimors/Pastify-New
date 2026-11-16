@@ -36,7 +36,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       </Section>
 
       <div id="premium" className="scroll-mt-6">
-        <Section title="Premium" desc="No ads, and link lockers open straight away.">
+        <Section title="Premium" desc="Read every paste without ads.">
           {isPremium(user) ? (
             <div className="space-y-3 text-sm">
               <p>
@@ -107,7 +107,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         )}
       </Section>
 
-      <Section title="Delete account" desc="Deletes your pastes, lockers and unpaid balance. This can't be undone.">
+      <Section title="Delete account" desc="Deletes your pastes and unpaid balance. This can't be undone.">
         <SimpleForm action={deleteAccount} submit="Delete account" variant="danger">
           <input name="confirm" placeholder={`Type ${user.username}`} className="input" />
           <input name="password" type="password" placeholder="Password" className="input" />

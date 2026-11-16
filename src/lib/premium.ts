@@ -64,13 +64,12 @@ export function verifyCheckout(cd: unknown): { buyerId: string; creatorId: strin
   return { buyerId, creatorId: creatorId || null };
 }
 
-/** Resolve "via" (paste:slug / locker:slug) or a referral code to the creator's user id. */
+/** Resolve "via" (paste:slug) or a referral code to the creator's user id. */
 export async function resolveCreator(via?: string | null, ref?: string | null, buyerId?: string | null) {
   let creatorId: string | null = null;
   if (via) {
     const [kind, slug] = via.split(":");
     if (kind === "paste" && slug) creatorId = (await db.paste.findUnique({ where: { slug }, select: { userId: true } }))?.userId ?? null;
-    if (kind === "locker" && slug) creatorId = (await db.locker.findUnique({ where: { slug }, select: { userId: true } }))?.userId ?? null;
   }
   if (!creatorId && ref && /^[a-z0-9]{3,32}$/.test(ref)) {
     creatorId = (await db.user.findUnique({ where: { referralCode: ref }, select: { id: true } }))?.id ?? null;

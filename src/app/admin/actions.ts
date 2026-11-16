@@ -17,10 +17,9 @@ export async function rejectPayout(id: string, form: FormData) {
   revalidatePath("/admin");
 }
 
-export async function setContentStatus(kind: "PASTE" | "LOCKER", slug: string, status: "ACTIVE" | "REMOVED") {
+export async function setContentStatus(slug: string, status: "ACTIVE" | "REMOVED") {
   await requireAdmin();
-  if (kind === "PASTE") await db.paste.updateMany({ where: { slug }, data: { status } });
-  else await db.locker.updateMany({ where: { slug }, data: { status } });
+  await db.paste.updateMany({ where: { slug }, data: { status } });
   if (status === "REMOVED") await db.report.updateMany({ where: { slug, status: "OPEN" }, data: { status: "RESOLVED" } });
   revalidatePath("/admin");
   revalidatePath("/admin/content");

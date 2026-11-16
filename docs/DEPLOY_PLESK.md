@@ -62,9 +62,7 @@ Still on the Node.js page, open **Custom environment variables** and add these. 
 | `ADMIN_EMAIL` | your email; that account becomes admin when it signs up |
 | `IP_HEADER` | `x-real-ip` (or `cf-connecting-ip` if the domain is proxied by Cloudflare) |
 | `GEO_HEADER` | `cf-ipcountry` if proxied by Cloudflare; otherwise leave empty |
-| `SPONSOR_URL` | your ad/offer smartlink(s), comma-separated |
-| `NEXT_PUBLIC_AD_SCRIPT_URL` | your display-ad script URL (optional) |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | optional bot check |
+| `NEXT_PUBLIC_AD_SCRIPT_URL` | your display-ad script (shown beside earning pastes) |
 | `NEXT_PUBLIC_PADDLE_ENV`, `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_MONTHLY`, `PADDLE_PRICE_QUARTERLY`, `PADDLE_PRICE_YEARLY` | when Premium is ready (see README) |
 
 > **Country rates need a country header.** Plesk doesn't add one. The simplest way is to turn on Cloudflare's proxy (orange cloud) for the domain and set `GEO_HEADER=cf-ipcountry` and `IP_HEADER=cf-connecting-ip`. Without it, every visitor is paid at the "Rest of world" rate.
@@ -115,7 +113,7 @@ Tools & Settings (or your domain) → **Scheduled Tasks** → **Add Task** → *
 curl -fsS -H "Authorization: Bearer YOUR_CRON_SECRET" https://your-domain/api/cron/cleanup
 ```
 
-It deletes expired pastes (7 days after expiry), old unlock sessions and stale sign-in sessions.
+It deletes expired pastes (7 days after expiry), stale rate-limit records and stale sign-in sessions.
 
 ## Updating the site
 

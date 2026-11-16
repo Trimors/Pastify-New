@@ -43,7 +43,7 @@ export default async function CreatorPremiumPage() {
 
       <section className="card space-y-3 p-5">
         <p className="font-semibold">Your Premium link</p>
-        <p className="text-sm text-muted">Sales count for you when visitors buy from one of your pastes or lockers, or from this link.</p>
+        <p className="text-sm text-muted">Sales count for you when visitors buy from one of your pastes, or from this link.</p>
         <div className="flex items-center justify-between gap-3 rounded-lg border border-line bg-ink px-3 py-2">
           <span className="truncate font-mono text-sm">{SITE_HOST}/premium?ref={user.referralCode}</span>
           <CopyButton text={link} />

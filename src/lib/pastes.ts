@@ -66,11 +66,8 @@ async function newSlug() {
   for (let i = 0; i < 8; i++) {
     const s = shortId();
     if (RESERVED_SLUGS.has(s.toLowerCase())) continue;
-    const [p, l] = await Promise.all([
-      db.paste.findUnique({ where: { slug: s }, select: { id: true } }),
-      db.locker.findUnique({ where: { slug: s }, select: { id: true } }),
-    ]);
-    if (!p && !l) return s;
+    const p = await db.paste.findUnique({ where: { slug: s }, select: { id: true } });
+    if (!p) return s;
   }
   throw new Error("Could not allocate a link. Try again.");
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { breakdown, overview, series, PERIODS } from "@/lib/stats";
-import { balanceOf } from "@/lib/unlock";
+import { balanceOf } from "@/lib/views";
 import { usd } from "@/lib/money";
 import { compact, num, pct, dayMonth } from "@/lib/format";
 import { countryName, flag } from "@/lib/geo";
@@ -36,22 +36,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
     breakdown(user.id, period, "device"),
     breakdown(user.id, period, "browser"),
     breakdown(user.id, period, "resourceId", 6),
-    Promise.all([db.paste.count({ where: { userId: user.id } }), db.locker.count({ where: { userId: user.id } })]),
+    db.paste.count({ where: { userId: user.id } }),
   ]);
 
   const ids = top.map((t) => t.key);
-  const [pastes, lockers] = await Promise.all([
-    db.paste.findMany({ where: { id: { in: ids } }, select: { id: true, title: true, slug: true } }),
-    db.locker.findMany({ where: { id: { in: ids } }, select: { id: true, title: true, slug: true } }),
-  ]);
-  const titles = new Map([...pastes.map((p) => [p.id, { t: p.title, href: `/${p.slug}` }] as const), ...lockers.map((l) => [l.id, { t: l.title, href: `/l/${l.slug}` }] as const)]);
+  const pastes = await db.paste.findMany({ where: { id: { in: ids } }, select: { id: true, title: true, slug: true } });
+  const titles = new Map(pastes.map((p) => [p.id, { t: p.title, href: `/${p.slug}` }] as const));
 
   const chartData = points.map((p) => ({
     label: period === "today" ? p.day : dayMonth(new Date(p.day)),
     value: metric === "earnings" ? p.earnings / 1e6 : p[metric],
   }));
   const fmt = metric === "earnings" ? (n: number) => `$${n.toFixed(2)}` : (n: number) => compact(n);
-  const empty = counts[0] + counts[1] === 0;
+  const empty = counts === 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

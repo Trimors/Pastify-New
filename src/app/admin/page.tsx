@@ -10,10 +10,9 @@ export const metadata = { title: "Admin" };
 export default async function AdminHome() {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
-  const [users, pastes, lockers, viewsToday, earnToday, payouts, reports, liability] = await Promise.all([
+  const [users, pastes, viewsToday, earnToday, payouts, reports, liability] = await Promise.all([
     db.user.count(),
     db.paste.count(),
-    db.locker.count(),
     db.viewEvent.count({ where: { createdAt: { gte: today } } }),
     db.viewEvent.aggregate({ where: { createdAt: { gte: today } }, _sum: { earningMicros: true } }),
     db.payout.findMany({ where: { status: "PENDING" }, orderBy: { createdAt: "asc" }, include: { user: { select: { username: true, email: true, createdAt: true } } } }),
@@ -25,7 +24,6 @@ export default async function AdminHome() {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Box k="Users" v={num(users)} />
         <Box k="Pastes" v={num(pastes)} />
-        <Box k="Lockers" v={num(lockers)} />
         <Box k="Views today" v={num(viewsToday)} />
         <Box k="Owed today" v={usd(earnToday._sum.earningMicros ?? 0n)} />
         <Box k="Total balances" v={usd(liability._sum.amountMicros ?? 0n)} />
@@ -71,14 +69,14 @@ export default async function AdminHome() {
           {reports.map((r) => (
             <li key={r.id} className="flex flex-wrap items-start gap-4 border-t border-line p-4 first:border-t-0">
               <div className="min-w-0 flex-1">
-                <Link href={r.kind === "PASTE" ? `/${r.slug}` : `/l/${r.slug}`} target="_blank" className="font-mono text-sm text-rose hover:underline">
-                  {r.kind === "PASTE" ? "/" : "/l/"}{r.slug}
+                <Link href={`/${r.slug}`} target="_blank" className="font-mono text-sm text-rose hover:underline">
+                  /{r.slug}
                 </Link>
                 <p className="mt-1 text-sm"><span className="chip mr-2">{r.reason}</span>{r.details}</p>
                 <p className="mt-1 text-xs text-muted">{r.reporterEmail ?? "Anonymous"} · {relTime(r.createdAt)}</p>
               </div>
               <div className="flex gap-2">
-                <form action={setContentStatus.bind(null, r.kind, r.slug, "REMOVED")}><button className="btn btn-danger btn-sm">Remove content</button></form>
+                <form action={setContentStatus.bind(null, r.slug, "REMOVED")}><button className="btn btn-danger btn-sm">Remove content</button></form>
                 <form action={dismissReport.bind(null, r.id)}><button className="btn btn-secondary btn-sm">Dismiss</button></form>
               </div>
             </li>

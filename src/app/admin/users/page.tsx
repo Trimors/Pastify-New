@@ -11,7 +11,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
     where: q ? { OR: [{ email: { contains: q, mode: "insensitive" } }, { username: { contains: q, mode: "insensitive" } }] } : {},
     orderBy: { createdAt: "desc" },
     take: 50,
-    include: { _count: { select: { pastes: true, lockers: true, referrals: true } } },
+    include: { _count: { select: { pastes: true, referrals: true } } },
   });
   const balances = await db.ledgerEntry.groupBy({ by: ["userId"], where: { userId: { in: users.map((u) => u.id) } }, _sum: { amountMicros: true } });
   const bal = new Map(balances.map((b) => [b.userId, b._sum.amountMicros ?? 0n]));
@@ -34,7 +34,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: Promi
                   <p className="text-xs text-muted">{u.email}{u.totpEnabled ? " · 2FA" : ""}</p>
                 </td>
                 <td className="px-4 py-3 text-xs text-muted">{relTime(u.createdAt)}</td>
-                <td className="px-4 py-3 text-xs text-muted">{u._count.pastes} pastes · {u._count.lockers} lockers · {u._count.referrals} refs</td>
+                <td className="px-4 py-3 text-xs text-muted">{u._count.pastes} pastes · {u._count.referrals} refs</td>
                 <td className="px-4 py-3 font-mono">{usd(bal.get(u.id) ?? 0n)}</td>
                 <td className="px-4 py-3">
                   <form action={adjustBalance.bind(null, u.id)} className="flex gap-1">

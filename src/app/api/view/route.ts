@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { clientIp, getUser } from "@/lib/auth";
 import { rateLimit } from "@/lib/ratelimit";
-import { checkPow, checkViewToken, creditPasteView, PAID_VIEW_POW_BITS, recordView } from "@/lib/unlock";
+import { checkPow, checkViewToken, creditPasteView, PAID_VIEW_POW_BITS, recordView } from "@/lib/views";
 import { classifyReferrer, visitor } from "@/lib/visitor";
 import { SITE_HOST } from "@/lib/config";
 
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const host = (await headers()).get("host") || SITE_HOST;
   const user = await getUser();
   const v = await visitor();
-  const viewId = await recordView({ id: p.id, userId: p.userId, kind: "PASTE" }, v, classifyReferrer(body.referrer, host), user?.id ?? null);
+  const viewId = await recordView({ id: p.id, userId: p.userId }, v, classifyReferrer(body.referrer, host), user?.id ?? null);
 
   if (!p.earning || !viewId) return NextResponse.json({ ok: true, paid: false });
   const t = checkViewToken(p.id, String(body.token ?? ""));

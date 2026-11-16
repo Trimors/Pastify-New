@@ -28,6 +28,7 @@ enum ContentStatus {
   REMOVED
 }
 
+/// LOCKER is kept only so data from before link lockers were removed stays valid.
 enum ResourceKind {
   PASTE
   LOCKER
@@ -72,7 +73,7 @@ model User {
   referrals         User[]        @relation("Referrals")
   payoutMethod      String?
   payoutDestination String?
-  /// Visitor Premium: skips unlock steps and ads until this time.
+  /// Visitor Premium: no ads until this time.
   premiumUntil      DateTime?
   emailOnPayout     Boolean       @default(true)
   emailOnReport     Boolean       @default(true)
@@ -85,7 +86,6 @@ model User {
   folders  Folder[]
   templates Template[]
   subscriptions Subscription[] @relation("SubscriptionBuyer")
-  lockers  Locker[]
   ledger   LedgerEntry[]
   payouts  Payout[]
 }
@@ -160,40 +160,6 @@ model Paste {
   @@index([visibility, status, createdAt])
 }
 
-model Locker {
-  id           String        @id @default(cuid())
-  slug         String        @unique
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title        String
-  description  String?
-  targetUrl    String
-  // "light" = 1 step, "standard" = 2 steps, "heavy" = 3 steps
-  intensity    String        @default("standard")
-  waitSeconds  Int           @default(0)
-  status       ContentStatus @default(ACTIVE)
-  views        Int           @default(0)
-  unlocks      Int           @default(0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  targets      LockerTarget[]
-
-  @@index([userId, createdAt])
-}
-
-/// Extra destinations for one locker: /l/{slug}?d={code} sends unlocked visitors to url.
-model LockerTarget {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  lockerId  String
-  locker    Locker   @relation(fields: [lockerId], references: [id], onDelete: Cascade)
-  url       String
-  label     String?
-  createdAt DateTime @default(now())
-
-  @@index([lockerId])
-}
-
 model ViewEvent {
   id             String       @id @default(cuid())
   kind           ResourceKind
@@ -212,25 +178,6 @@ model ViewEvent {
 
   @@index([ownerId, createdAt])
   @@index([resourceId, visitorHash, createdAt])
-}
-
-model UnlockSession {
-  id          String       @id @default(cuid())
-  kind        ResourceKind
-  resourceId  String
-  viewEventId String?
-  visitorHash String
-  // JSON array of { kind, seconds }
-  steps       Json
-  stepIndex   Int          @default(0)
-  stepStarted DateTime     @default(now())
-  powSalt     String
-  powBits     Int
-  powSolved   Boolean      @default(false)
-  completedAt DateTime?
-  createdAt   DateTime     @default(now())
-
-  @@index([visitorHash, createdAt])
 }
 
 model LedgerEntry {

@@ -5,13 +5,13 @@ import { shortDate } from "@/lib/format";
 import { PremiumCheckout } from "@/components/PremiumCheckout";
 import { startCheckout } from "./actions";
 
-export const metadata = { title: "Premium", description: "No ads on Pastify, and link lockers open straight away." };
+export const metadata = { title: "Premium", description: "Read every paste on Pastify without ads." };
 
 type SP = Promise<{ via?: string; ref?: string }>;
 
 export default async function PremiumPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const via = sp.via && /^(paste|locker):[A-Za-z0-9_-]{3,32}$/.test(sp.via) ? sp.via : null;
+  const via = sp.via && /^paste:[A-Za-z0-9_-]{3,32}$/.test(sp.via) ? sp.via : null;
   const ref = sp.ref && /^[a-z0-9]{3,32}$/.test(sp.ref) ? sp.ref : null;
   const user = await getUser();
   const active = isPremium(user);
@@ -22,7 +22,7 @@ export default async function PremiumPage({ searchParams }: { searchParams: SP }
     <div className="mx-auto max-w-5xl px-4 py-12">
       <p className="label !text-rose">Pastify Premium</p>
       <h1 className="max-w-2xl text-5xl font-extrabold tracking-[-0.03em]">No ads. Anywhere.</h1>
-      <p className="mt-4 max-w-xl text-lg text-muted">Read every paste without ads, and open link lockers without steps. Part of every payment goes to the creator who brought you here.</p>
+      <p className="mt-4 max-w-xl text-lg text-muted">Read every paste without ads. Part of every payment goes to the creator who brought you here.</p>
 
       {active ? (
         <div className="card mt-10 p-6">
@@ -46,7 +46,7 @@ export default async function PremiumPage({ searchParams }: { searchParams: SP }
 
       <section className="mt-14 grid gap-4 md:grid-cols-3">
         {[
-          ["No locker steps", "Link lockers open straight away."],
+          ["Cleaner pages", "Just the paste, nothing beside it."],
           ["No ads", "No ad slots or sponsor pages while you browse."],
           ["Supports creators", `Creators get ${SHARE.basePct}–${SHARE.boostedPct}% of your plan's price.`],
         ].map(([t, d]) => (

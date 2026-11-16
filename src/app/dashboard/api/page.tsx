@@ -16,7 +16,7 @@ export default async function ApiPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">API</h1>
         <p className="text-sm text-muted">
-          Create pastes and lockers from your own tools. <Link href="/docs/api" className="text-rose hover:underline">Read the API docs</Link>
+          Create and manage pastes from your own tools. <Link href="/docs/api" className="text-rose hover:underline">Read the API docs</Link>
         </p>
       </div>
       <section className="card p-5">

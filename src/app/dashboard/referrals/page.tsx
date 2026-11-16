@@ -20,10 +20,7 @@ export default async function ReferralsPage() {
   const ids = referred.map((r) => r.id);
   const lastItems = ids.length
     ? await db.$queryRaw<{ uid: string; last: Date }[]>`
-        SELECT uid, max(c) AS last FROM (
-          SELECT "userId" AS uid, max("createdAt") AS c FROM "Paste" WHERE "userId" = ANY(${ids}) GROUP BY 1
-          UNION ALL SELECT "userId", max("createdAt") FROM "Locker" WHERE "userId" = ANY(${ids}) GROUP BY 1
-        ) t GROUP BY uid`
+        SELECT "userId" AS uid, max("createdAt") AS last FROM "Paste" WHERE "userId" = ANY(${ids}) GROUP BY 1`
     : [];
   const lastMap = new Map(lastItems.map((r) => [r.uid, new Date(r.last)]));
   const monthAgo = Date.now() - 30 * 864e5;

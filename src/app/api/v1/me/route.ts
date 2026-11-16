@@ -1,5 +1,5 @@
 import { json, withApi } from "@/lib/api";
-import { balanceOf } from "@/lib/unlock";
+import { balanceOf } from "@/lib/views";
 
 export const GET = withApi(async (_req, user) => {
   const balance = await balanceOf(user.id);

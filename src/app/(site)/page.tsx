@@ -48,7 +48,7 @@ export default function Home() {
         <div className="grid gap-10 md:grid-cols-2">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Built to be trusted</h2>
-            <p className="mt-3 text-muted">The things creators ask other lockers for, on day one.</p>
+            <p className="mt-3 text-muted">The things creators ask other paste sites for, on day one.</p>
           </div>
           <ul className="grid gap-3 text-sm">
             {[

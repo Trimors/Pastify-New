@@ -7,7 +7,7 @@ const B = SITE_URL;
 
 const endpoints: { m: string; p: string; d: string; body?: string; res?: string }[] = [
   { m: "GET", p: "/api/v1/me", d: "Your username and current balance.", res: `{ "data": { "username": "you", "balanceUsd": 12.34 } }` },
-  { m: "GET", p: "/api/v1/stats?period=28d", d: "Views, paid views (unlocks) and earnings. period: today, 7d, 28d, 90d, all." },
+  { m: "GET", p: "/api/v1/stats?period=28d", d: "Views, paid views and earnings. period: today, 7d, 28d, 90d, all." },
   { m: "GET", p: "/api/v1/pastes?page=1&limit=25", d: "List your pastes, newest first." },
   {
     m: "POST",
@@ -32,31 +32,6 @@ const endpoints: { m: string; p: string; d: string; body?: string; res?: string 
   { m: "GET", p: "/api/v1/pastes/{slug}", d: "One paste, including its content." },
   { m: "PATCH", p: "/api/v1/pastes/{slug}", d: "Update any field from create. Send only what changes." },
   { m: "DELETE", p: "/api/v1/pastes/{slug}", d: "Delete a paste." },
-  { m: "GET", p: "/api/v1/lockers", d: "List your lockers." },
-  {
-    m: "POST",
-    p: "/api/v1/lockers",
-    d: "Lock a link.",
-    body: `{
-  "title": "Script pack v3",
-  "target": "https://example.com/download",
-  "intensity": "standard",       // light | standard | heavy
-  "waitSeconds": 0               // 0-120
-}`,
-    res: `{ "data": { "slug": "Ab3k9P", "url": "${B}/l/Ab3k9P", ... } }`,
-  },
-  { m: "GET", p: "/api/v1/lockers/{slug}", d: "One locker." },
-  { m: "PATCH", p: "/api/v1/lockers/{slug}", d: "Change title, target, description, intensity or waitSeconds." },
-  { m: "DELETE", p: "/api/v1/lockers/{slug}", d: "Delete a locker." },
-  {
-    m: "POST",
-    p: "/api/v1/lockers/{slug}/targets",
-    d: "One locker, many destinations. Adds a destination and returns its own share link. Views and earnings stay on the locker.",
-    body: `{ "target": "https://example.com/file-42", "label": "File 42" }`,
-    res: `{ "data": { "code": "Hk3mQx7a", "url": "${B}/l/Ab3k9P?d=Hk3mQx7a", ... } }`,
-  },
-  { m: "GET", p: "/api/v1/lockers/{slug}/targets", d: "List a locker's destinations." },
-  { m: "DELETE", p: "/api/v1/lockers/{slug}/targets/{code}", d: "Remove a destination." },
 ];
 
 export default function ApiDocs() {
