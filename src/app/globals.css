@@ -1,14 +1,24 @@
 @import "tailwindcss";
 
+/*
+ * Pastify glass system.
+ * Glass only reads as glass with colour behind it, so every page sits on a fixed layer of
+ * soft pink / magenta / violet light (<GlassBackdrop />). Surfaces are translucent tints
+ * with a hairline white edge and a top sheen. There is no live blur over large areas: a
+ * page-sized backdrop-filter is redrawn on every scroll frame. Only the sticky header and
+ * floating menus blur, and phones get solid bars instead.
+ * Colour tokens are translucent on purpose, so existing bg-surface / border-line / bg-ink
+ * classes turn into glass everywhere without per-page changes.
+ */
 @theme {
   --color-pink: #ef3b98;
   --color-magenta: #d13bd0;
   --color-violet: #a34dff;
-  --color-ink: #0b0710;
-  --color-surface: #140c1b;
-  --color-surface-2: #1b1124;
-  --color-line: #2a1f33;
-  --color-muted: #a99bb5;
+  --color-ink: rgb(8 5 12 / 0.55);
+  --color-surface: rgb(20 12 27 / 0.62);
+  --color-surface-2: rgb(255 255 255 / 0.07);
+  --color-line: rgb(255 255 255 / 0.1);
+  --color-muted: #b6a8c2;
   --color-rose: #f07cc4;
   --color-paper: #f7f2fa;
   --color-ok: #4fd18b;
@@ -21,12 +31,19 @@
 :root {
   --pastify-gradient: linear-gradient(135deg, #ef3b98, #d13bd0 50%, #a34dff);
   --pastify-bar: linear-gradient(90deg, #ef3b98, #d13bd0 50%, #a34dff);
+  --page: #0b0710;
+  --glass-edge: rgb(255 255 255 / 0.1);
+  --glass-edge-strong: rgb(255 255 255 / 0.18);
+  --glass-sheen: inset 0 1px 0 0 rgb(255 255 255 / 0.12);
+  --glass-shadow: 0 18px 44px -26px rgb(0 0 0 / 0.85);
+  --glass-tint: linear-gradient(160deg, rgb(255 255 255 / 0.06), transparent 55%);
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
   color-scheme: dark;
 }
 
 html,
 body {
-  background: var(--color-ink);
+  background: var(--page);
   color: var(--color-paper);
 }
 
@@ -34,10 +51,16 @@ body {
   font-family: var(--font-sans);
   letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
+  isolation: isolate;
 }
 
 ::selection {
   background: #d13bd055;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #f07cc4;
+  outline-offset: 2px;
 }
 
 .bg-gradient {
@@ -53,18 +76,133 @@ body {
   color: transparent;
 }
 
-/* Buttons */
+/* ── Backdrop ─────────────────────────────────────────────────────────── */
+.pf-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  transform: translateZ(0);
+  background-color: #0b0710;
+  background-image:
+    radial-gradient(50% 44% at 6% 4%, rgb(239 59 152 / 0.3) 0%, transparent 100%),
+    radial-gradient(44% 42% at 96% 14%, rgb(163 77 255 / 0.26) 0%, transparent 100%),
+    radial-gradient(50% 46% at 80% 96%, rgb(209 59 208 / 0.22) 0%, transparent 100%),
+    radial-gradient(40% 40% at 10% 92%, rgb(163 77 255 / 0.16) 0%, transparent 100%);
+  transition: opacity 400ms var(--ease-out);
+}
+.pf-backdrop--bold {
+  background-image:
+    radial-gradient(54% 48% at 6% 4%, rgb(239 59 152 / 0.55) 0%, transparent 100%),
+    radial-gradient(46% 44% at 96% 16%, rgb(163 77 255 / 0.48) 0%, transparent 100%),
+    radial-gradient(52% 48% at 78% 94%, rgb(209 59 208 / 0.42) 0%, transparent 100%),
+    radial-gradient(42% 42% at 12% 88%, rgb(239 59 152 / 0.28) 0%, transparent 100%);
+}
+.pf-orb {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgb(209 59 208 / 0.26) 0%, rgb(163 77 255 / 0.14) 35%, transparent 70%);
+  opacity: 0.55;
+}
+.pf-backdrop--bold .pf-orb {
+  opacity: 1;
+}
+/* A faint grain keeps large gradients from banding. */
+.pf-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Surfaces ─────────────────────────────────────────────────────────── */
+.card {
+  background-color: var(--color-surface);
+  background-image: var(--glass-tint);
+  border: 1px solid var(--glass-edge);
+  border-radius: 1.1rem;
+  box-shadow: var(--glass-sheen), var(--glass-shadow);
+}
+/* Lighter, more see-through tile for marketing sections. */
+.glass-tile {
+  background-color: rgb(255 255 255 / 0.035);
+  background-image: linear-gradient(160deg, rgb(255 255 255 / 0.1) 0%, rgb(255 255 255 / 0.03) 55%, rgb(163 77 255 / 0.08) 100%);
+  border: 1px solid var(--glass-edge);
+  border-radius: 1.5rem;
+  box-shadow: var(--glass-sheen), var(--glass-shadow);
+}
+/* An outer frame around a panel: the double edge that makes it read as a slab of glass. */
+.glass-frame {
+  background-color: rgb(255 255 255 / 0.03);
+  border: 1px solid var(--glass-edge);
+  border-radius: 1.9rem;
+  padding: 0.6rem;
+  box-shadow: var(--glass-sheen);
+}
+/* Brand-tinted glass for the one highlight on a screen. White text stays above 4.5:1. */
+.glass-brand {
+  background-color: rgb(58 16 64 / 0.72);
+  background-image:
+    radial-gradient(70% 60% at 8% 0%, rgb(255 255 255 / 0.12) 0%, transparent 100%),
+    radial-gradient(55% 80% at 10% 10%, rgb(239 59 152 / 0.32) 0%, transparent 100%),
+    radial-gradient(50% 75% at 92% 100%, rgb(163 77 255 / 0.34) 0%, transparent 100%);
+  border: 1px solid rgb(255 255 255 / 0.2);
+  box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.26), 0 24px 60px -28px rgb(209 59 208 / 0.65);
+}
+/* Code and rich text stay on a dark, nearly solid plate so they are easy to read. */
+.glass-deep {
+  background-color: rgb(12 8 17 / 0.9);
+}
+.glass-header {
+  background-color: rgb(11 7 16 / 0.55);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: var(--glass-sheen), 0 12px 30px -18px rgb(0 0 0 / 0.8);
+}
+.glass-bar {
+  background-color: rgb(11 7 16 / 0.72);
+  box-shadow: var(--glass-sheen);
+}
+/* Phones get solid bars: blur is the costliest thing they would ever draw. */
+@media (hover: none) {
+  .glass-header {
+    background-color: rgb(14 9 20 / 0.96);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-header { background-color: rgb(14 9 20 / 0.96); }
+  .glass-brand { background-color: rgb(58 16 64); }
+}
+.glass-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background-color: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 0 0 1px var(--glass-edge), var(--glass-sheen);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 0.6rem;
-  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.25rem;
-  transition: transform 120ms ease-out, background-color 120ms ease-out, border-color 120ms ease-out, opacity 120ms;
+  transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), box-shadow 200ms var(--ease-out), opacity 160ms;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -75,28 +213,51 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* The one gradient action per screen: glossy, with a glow and a light sweep on hover. */
 .btn-primary {
+  overflow: hidden;
   background-image: var(--pastify-bar);
   color: white;
-  box-shadow: 0 6px 24px -8px #d13bd0aa;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.35),
+    inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    0 8px 26px -8px rgb(209 59 208 / 0.75);
 }
 .btn-primary:hover {
-  filter: brightness(1.08);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.42),
+    inset 0 0 0 1px rgb(255 255 255 / 0.16),
+    0 10px 34px -6px rgb(209 59 208 / 0.9);
+}
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.32) 50%, transparent 65%);
+  translate: -120% 0;
+  pointer-events: none;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .btn-primary::before { transition: translate 700ms ease; }
+  .btn-primary:hover::before { translate: 120% 0; }
+  .btn-primary:hover { transform: translateY(-1px); }
 }
 .btn-secondary {
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-line);
+  background-color: rgb(255 255 255 / 0.07);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-sheen);
   color: var(--color-paper);
 }
 .btn-secondary:hover {
-  border-color: #4a3a57;
+  background-color: rgb(255 255 255 / 0.11);
+  border-color: var(--glass-edge-strong);
 }
 .btn-ghost {
   color: var(--color-muted);
 }
 .btn-ghost:hover {
   color: var(--color-paper);
-  background: var(--color-surface-2);
+  background: rgb(255 255 255 / 0.07);
 }
 .btn-danger {
   background: #ff6b8114;
@@ -104,35 +265,39 @@ body {
   color: var(--color-bad);
 }
 .btn-sm {
-  padding: 0.35rem 0.7rem;
+  padding: 0.35rem 0.8rem;
   font-size: 0.8rem;
 }
 
-/* Form controls */
+/* ── Form controls ────────────────────────────────────────────────────── */
 .input {
   width: 100%;
-  background: var(--color-ink);
-  border: 1px solid var(--color-line);
-  border-radius: 0.6rem;
-  padding: 0.6rem 0.8rem;
+  background-color: rgb(8 5 12 / 0.55);
+  border: 1px solid var(--glass-edge);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.85rem;
   font-size: 0.9rem;
   color: var(--color-paper);
-  transition: border-color 120ms;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35);
+  transition: border-color 160ms, box-shadow 160ms;
 }
 .input:focus {
   outline: none;
-  border-color: var(--color-magenta);
-  box-shadow: 0 0 0 3px #d13bd022;
+  border-color: rgb(209 59 208 / 0.7);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.35), 0 0 0 4px rgb(209 59 208 / 0.16);
 }
 .input::placeholder {
-  color: #6d6078;
+  color: #7a6c86;
 }
 select.input {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A99BB5' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23B6A8C2' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   padding-right: 2rem;
+}
+select.input option {
+  background: #140c1b;
 }
 .label {
   display: block;
@@ -144,12 +309,6 @@ select.input {
   margin-bottom: 0.4rem;
 }
 
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: 1rem;
-}
-
 .chip {
   display: inline-flex;
   align-items: center;
@@ -158,15 +317,55 @@ select.input {
   padding: 0.15rem 0.6rem;
   font-size: 0.72rem;
   font-weight: 600;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--glass-edge);
   color: var(--color-muted);
-  background: var(--color-surface-2);
+  background: rgb(255 255 255 / 0.06);
+  box-shadow: var(--glass-sheen);
 }
-.chip-public { color: #7ee0a8; border-color: #7ee0a833; background: #7ee0a810; }
-.chip-unlisted { color: #f5b84b; border-color: #f5b84b33; background: #f5b84b10; }
-.chip-private { color: #a99bb5; }
-.chip-earning { color: #f07cc4; border-color: #ef3b9844; background: #ef3b9814; }
-.chip-removed { color: var(--color-bad); border-color: #ff6b8144; background: #ff6b8110; }
+.chip-public { color: #7ee0a8; border-color: #7ee0a833; background: #7ee0a812; }
+.chip-unlisted { color: #f5b84b; border-color: #f5b84b33; background: #f5b84b12; }
+.chip-private { color: #b6a8c2; }
+.chip-earning { color: #f07cc4; border-color: #ef3b9855; background: #ef3b981f; }
+.chip-removed { color: var(--color-bad); border-color: #ff6b8144; background: #ff6b8112; }
+
+/* ── Cursor light, edge glow and tilt (desktop only, see GlassEffects) ── */
+.spot {
+  position: relative;
+}
+.spot > .pf-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.spot > .pf-glare > span {
+  position: absolute;
+  left: -240px;
+  top: -240px;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgb(240 124 196 / 0.14), transparent 65%);
+  will-change: transform;
+}
+.spot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: inset 0 0 0 1px rgb(240 124 196 / 0.45);
+  transition: opacity 240ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .spot:hover::after { opacity: 1; }
+  .lift { transition: transform 240ms var(--ease-out); }
+  .lift:hover { transform: translateY(-3px); }
+}
+.tilt {
+  transition: transform 260ms var(--ease-out);
+}
 
 /* Code view */
 .code-view pre {
@@ -221,6 +420,7 @@ select.input {
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  .tilt, .lift:hover { transform: none !important; }
 }
 
 /* Rich pastes (editor + viewer) */

@@ -74,7 +74,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
       )}
 
       <div className="grid gap-4 md:grid-cols-[1fr_2fr]">
-        <div className="card flex flex-col justify-between p-5">
+        <div className="glass-brand flex flex-col justify-between rounded-[1.1rem] p-5">
           <div>
             <p className="label">Current balance</p>
             <p className="font-mono text-4xl font-medium">{usd(balance)}</p>

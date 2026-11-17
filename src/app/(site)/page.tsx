@@ -6,11 +6,10 @@ export default function Home() {
   return (
     <>
       <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-gradient opacity-[0.12] blur-3xl" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-16 md:grid-cols-[1.1fr_1fr] md:pt-24">
           <div>
-            <Link href="/switch" className="mb-5 inline-flex items-center gap-2 rounded-full border border-magenta/40 bg-magenta/10 px-3 py-1 text-xs font-semibold text-rose hover:bg-magenta/15">
-              Moving from Paster? Start here →
+            <Link href="/switch" className="glass-pill mb-5 text-rose hover:bg-white/10">
+              <span className="h-1.5 w-1.5 rounded-full bg-pink" /> Moving from Paster? Start here →
             </Link>
             <p className="label !text-rose">Paste · Share · Earn</p>
             <h1 className="mt-3 text-5xl font-extrabold leading-[1.02] tracking-[-0.04em] sm:text-6xl">
@@ -25,7 +24,7 @@ export default function Home() {
               <Link href="/new" className="btn btn-primary">Create paste</Link>
               <Link href="/signup" className="btn btn-secondary">Start earning</Link>
             </div>
-            <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 text-sm">
+            <dl className="glass-tile mt-10 grid max-w-md grid-cols-3 gap-4 !rounded-2xl p-4 text-sm">
               <Stat k={`$${RATE_TIERS[0].cpm.toFixed(2)}`} v="Top CPM" />
               <Stat k={`$${EARN.payoutMinimumUsd}`} v="Payout minimum" />
               <Stat k={`${EARN.payoutTargetDays} days`} v="Payout target" />
@@ -55,11 +54,11 @@ export default function Home() {
               ["Public rates", "CPM for every country, on a public page. No guessing."],
               ["Clear payouts", `$${EARN.payoutMinimumUsd} minimum. PayPal or crypto. Every request and status in your dashboard.`],
               ["No waiting", "Pastes open straight away. No steps, no countdowns."],
-              ["Real views only", "Server-checked steps, bot filtering and one count per visitor per day."],
+              ["Real views only", "Server-checked views, bot filtering and one count per visitor per day."],
               ["A real editor", "Rich text or code, templates, clone from other pastebins, expiry, passwords, folders."],
               ["Your data, your way", "Raw and download on every paste, a documented API, and two-factor sign-in."],
             ].map(([t, d]) => (
-              <li key={t} className="card flex gap-4 p-4">
+              <li key={t} className="glass-tile spot flex gap-4 !rounded-2xl p-4">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-gradient" />
                 <div>
                   <p className="font-semibold">{t}</p>
@@ -72,11 +71,10 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="card relative overflow-hidden p-10 text-center">
-          <div className="pointer-events-none absolute inset-0 bg-gradient opacity-[0.07]" />
+        <div className="glass-brand relative overflow-hidden rounded-[2rem] p-10 text-center sm:p-14">
           <Mark size={56} animate className="mx-auto" />
           <h2 className="mt-4 text-3xl font-bold tracking-tight">Earn from every view of your pastes.</h2>
-          <p className="mt-2 text-muted">Free for creators. Set up in a minute.</p>
+          <p className="mt-2 text-white/80">Free for creators. Set up in a minute.</p>
           <div className="mt-6 flex justify-center gap-3">
             <Link href="/signup" className="btn btn-primary">Create account</Link>
             <Link href="/earn" className="btn btn-secondary">See rates</Link>
@@ -98,7 +96,7 @@ function Stat({ k, v }: { k: string; v: string }) {
 
 function Step({ n, t, d }: { n: string; t: string; d: string }) {
   return (
-    <div className="card p-6">
+    <div className="glass-tile spot lift p-6">
       <p className="font-mono text-sm text-rose">{n}</p>
       <p className="mt-3 text-lg font-semibold">{t}</p>
       <p className="mt-1 text-sm text-muted">{d}</p>
@@ -116,8 +114,9 @@ function HeroCard() {
     ["return", " settings"],
   ];
   return (
-    <div className="relative">
-      <div className="card overflow-hidden shadow-2xl shadow-magenta/10">
+    <div className="tilt relative">
+      <div className="glass-frame">
+      <div className="card glass-deep overflow-hidden">
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
           <span className="font-mono text-sm">config.lua</span>
           <span className="chip chip-earning"><span className="h-1.5 w-1.5 rounded-full bg-pink" /> Earning</span>
@@ -134,11 +133,12 @@ function HeroCard() {
           ))}
         </pre>
       </div>
-      <div className="card absolute -bottom-8 -right-2 w-64 p-4 shadow-2xl sm:-right-6">
+      </div>
+      <div className="glass-brand absolute -bottom-8 -right-2 w-64 rounded-2xl p-4 sm:-right-6">
         <p className="text-sm font-semibold">Your paste is live</p>
-        <div className="mt-2 flex items-center justify-between rounded-lg border border-line bg-ink px-3 py-2">
+        <div className="mt-2 flex items-center justify-between rounded-full border border-white/15 bg-black/30 px-3 py-2">
           <span className="truncate font-mono text-xs">{SITE_HOST}/x8Kq2</span>
-          <span className="text-xs font-semibold text-rose">Copy</span>
+          <span className="text-xs font-semibold text-white">Copy</span>
         </div>
       </div>
     </div>

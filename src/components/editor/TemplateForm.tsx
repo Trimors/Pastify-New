@@ -20,7 +20,7 @@ export function TemplateForm({ action, initial }: { action: (s: { error?: string
           ))}
         </div>
       </div>
-      <div className="card overflow-hidden">
+      <div className="card glass-deep overflow-hidden">
         {format === "rich" ? (
           <RichEditor value={content} onChange={setContent} />
         ) : (
