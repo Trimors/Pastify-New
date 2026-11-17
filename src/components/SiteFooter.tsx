@@ -8,7 +8,15 @@ export function SiteFooter() {
         <div className="space-y-3">
           <Logo />
           <p className="text-sm text-muted">Paste. Share. Earn.</p>
-          <p className="font-mono text-[10px] tracking-[0.25em] text-muted/70">ENGINEERED BY TRIMORS TECHNOLOGIES</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/trimors-technologies-light.webp"
+            alt="Trimors Technologies"
+            width={2000}
+            height={614}
+            loading="lazy"
+            className="h-11 w-auto opacity-85 sm:h-12"
+          />
         </div>
         <FooterCol title="Product" links={[["New paste", "/new"], ["Explore", "/explore"], ["Pricing", "/pricing"], ["API", "/docs/api"], ["Moving from Paster", "/switch"]]} />
         <FooterCol title="Creators" links={[["Earn", "/earn"], ["Rates", "/earn#rates"], ["Dashboard", "/dashboard"], ["Referrals", "/dashboard/referrals"]]} />
