@@ -1,5 +1,6 @@
 "use client";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const MAX_TILT = 4; // degrees
 
@@ -9,6 +10,25 @@ const MAX_TILT = 4; // degrees
  * cursor never repaints the card. Off on touch screens and for reduced motion.
  */
 export function GlassEffects() {
+  const path = usePathname();
+
+  // Off-screen pause: [data-anim] sections get [data-visible] only while on screen,
+  // and CSS pauses their looping .pfa-* animations the rest of the time.
+  useEffect(() => {
+    const targets = document.querySelectorAll<HTMLElement>("[data-anim]");
+    if (typeof IntersectionObserver === "undefined") {
+      targets.forEach((el) => el.setAttribute("data-visible", ""));
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => (e.isIntersecting ? e.target.setAttribute("data-visible", "") : e.target.removeAttribute("data-visible"))),
+      { rootMargin: "80px" },
+    );
+    targets.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, [path]);
+
   useEffect(() => {
     const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

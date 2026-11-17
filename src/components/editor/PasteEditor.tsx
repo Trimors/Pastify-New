@@ -238,7 +238,7 @@ export function PasteEditor({ action, loggedIn, initial = {}, folders = [], temp
                 autoFocus={mode === "create"}
                 placeholder="Paste or type here…"
                 aria-label="Paste content"
-                className="min-h-[420px] flex-1 resize-none bg-transparent py-4 pr-4 font-mono text-[13.5px] leading-[1.7] text-paper outline-none placeholder:text-[#5b4d68]"
+                className="min-h-[420px] flex-1 resize-none bg-transparent focus-visible:outline-none py-4 pr-4 font-mono text-[13.5px] leading-[1.7] text-paper outline-none placeholder:text-[#5b4d68]"
                 wrap="off"
                 required
               />
