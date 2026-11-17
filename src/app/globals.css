@@ -58,9 +58,12 @@ body {
   background: #d13bd055;
 }
 
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid #f07cc4;
-  outline-offset: 2px;
+/* In the base layer so a utility like focus-visible:outline-none can switch it off. */
+@layer base {
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid #f07cc4;
+    outline-offset: 2px;
+  }
 }
 
 .bg-gradient {
@@ -455,3 +458,87 @@ select.input option {
   color: #5b4d68;
 }
 .rich-view { max-width: 100%; }
+
+/* ── Landing layout (frame → panels → tiles → widgets), after Kiwilock ── */
+.pf-frame {
+  background-color: rgb(255 255 255 / 0.035);
+  border: 1px solid var(--glass-edge);
+  border-radius: 40px;
+  padding: 10px;
+  box-shadow: var(--glass-sheen);
+}
+.pf-panel {
+  background-color: rgb(14 8 20 / 0.64);
+  border: 1px solid var(--glass-edge);
+  border-radius: 32px;
+  box-shadow: var(--glass-sheen), 0 24px 60px -30px rgb(0 0 0 / 0.75);
+}
+.pf-tile {
+  background-image: linear-gradient(160deg, rgb(255 255 255 / 0.1) 0%, rgb(255 255 255 / 0.035) 55%, rgb(163 77 255 / 0.08) 100%);
+  border: 1px solid var(--glass-edge);
+  border-radius: 32px;
+  box-shadow: var(--glass-sheen);
+}
+.pf-widget {
+  background-color: rgb(10 6 14 / 0.55);
+  border: 1px solid var(--glass-edge);
+  border-radius: 24px;
+  box-shadow: 0 0 0 5px rgb(255 255 255 / 0.03), var(--glass-sheen), 0 14px 30px -18px rgb(0 0 0 / 0.8);
+}
+.pf-fill-1 {
+  background-color: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+}
+/* Magenta-tinted glass for the active item. */
+.pf-fill-brand {
+  background-color: rgb(209 59 208 / 0.28);
+  box-shadow: inset 0 0 0 1px rgb(240 124 196 / 0.5), var(--glass-sheen), 0 6px 18px -8px rgb(209 59 208 / 0.75);
+}
+.pf-pill-on-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.3);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.pf-conic-ring {
+  background: conic-gradient(from 0deg, transparent 55%, #f07cc4 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+}
+@keyframes pf-spin { to { transform: rotate(360deg); } }
+.pfa-spin { animation: pf-spin 2.6s linear infinite; }
+@keyframes pf-flow { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(50px); opacity: 0; } }
+.pfa-flow { animation: pf-flow 2.8s ease-in-out infinite; }
+@keyframes pf-ping { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.6); opacity: 0; } }
+.pfa-ping { animation: pf-ping 900ms ease-out both; }
+@keyframes pf-plus { from { transform: translateY(4px); opacity: 0; } 30% { opacity: 1; } to { transform: translateY(-10px); opacity: 0; } }
+.pfa-plus { animation: pf-plus 1.6s ease-out both; }
+@keyframes pf-tick { from { transform: translateY(6px); opacity: 0.2; } to { transform: none; opacity: 1; } }
+.pfa-tick { animation: pf-tick 380ms var(--ease-out) both; }
+@keyframes pf-fill-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.pfa-fill-x { transform-origin: left; animation: pf-fill-x 1.2s var(--ease-out) both; }
+@keyframes pf-shimmer { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+.pfa-shimmer { animation: pf-shimmer 2.4s ease-in-out 1.2s infinite; }
+@keyframes pf-bar { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.pfa-bar { transform-box: fill-box; transform-origin: bottom; animation: pf-bar 700ms var(--ease-out) both; }
+.pf-chart-draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1400ms var(--ease-out); }
+.pf-chart-draw[data-shown="true"] { stroke-dashoffset: 0; }
+@keyframes pf-coin { 0%, 55% { transform: translateY(6px); opacity: 0; } 70% { opacity: 1; } 100% { transform: translateY(-8px); opacity: 0; } }
+.pfa-coin { animation: pf-coin 3.2s ease-out infinite; }
+@keyframes pf-badge-ping { 0%, 55% { transform: scale(1); opacity: 0; } 60% { opacity: 0.7; } 100% { transform: scale(1.45); opacity: 0; } }
+.pfa-badge-ping { animation: pf-badge-ping 3.2s ease-out infinite; }
+/* A slow light sweep across the brand card. */
+@keyframes pf-sweep { from { transform: translateX(-120%) skewX(-18deg); } to { transform: translateX(320%) skewX(-18deg); } }
+.pfa-sweep { position: absolute; inset: -10% auto -10% 0; width: 30%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.08), transparent); animation: pf-sweep 7s ease-in-out infinite; }
+/* Pause looping animations while off screen (set by GlassEffects). */
+[data-anim]:not([data-visible]) [class*="pfa-"] { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  [class*="pfa-"] { animation: none !important; }
+  .pf-chart-draw { stroke-dashoffset: 0; }
+}
