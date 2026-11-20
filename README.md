@@ -26,8 +26,8 @@ Engineered by Trimors Technologies.
 - Every paste opens straight away, with no steps or waiting
 - A paid view counts once the page has been visible for 5 seconds and a silent background proof-of-work (14 bits) is solved; the page carries a signed, time-stamped token so early or forged requests are rejected
 - Headless browsers and bot user agents are not paid
-- Each visitor counts once per paste every 24 hours; owners' own views never count
-- Visitors are identified by a daily-rotating hash of IP + browser (no raw visitor IPs stored)
+- One IP address counts once per paste in any rolling 24 hours, for views and earnings (IPv6 counted per /64 block, since providers hand out whole blocks); owners' own views never count
+- IPs are stored only as a one-way keyed hash, never raw; a lock per paste and IP stops simultaneous requests from counting twice
 
 **Creator dashboard**
 - Overview: balance, views, paid views, earnings, paid view rate, CPM, earnings per view

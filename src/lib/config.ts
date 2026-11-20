@@ -14,7 +14,7 @@ export const EARN = {
   payoutTargetDays: 5,
   /** Referrers earn this share of their referrals' earnings, paid by Pastify. */
   referralRate: 0.05,
-  /** A visitor only counts once per item in this window. */
+  /** An IP address (IPv6: its /64 block) counts once per paste in this rolling window, for views and earnings. */
   uniqueWindowHours: 24,
   payoutMethods: [
     { id: "paypal", label: "PayPal", placeholder: "you@example.com" },

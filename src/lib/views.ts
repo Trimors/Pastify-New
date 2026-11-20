@@ -19,7 +19,14 @@ export function checkPow(salt: string, nonce: string, bits: number) {
   return zeros >= bits;
 }
 
-/** Log a paste view, deduplicated per visitor for 30 minutes. Returns the view event id. */
+/** One IP address (IPv6: one /64 block) counts once per paste in any rolling 24 hours. */
+const ONE_PER_IP_MS = () => EARN.uniqueWindowHours * 3600e3;
+
+/**
+ * Log a paste view. An IP counts once per paste per 24 hours: repeat visits return the
+ * existing view instead of adding one. A per-(paste, IP) lock makes this hold even when
+ * several requests arrive at the same moment. Returns the view event id.
+ */
 export async function recordView(
   paste: { id: string; userId: string | null },
   v: VisitorInfo,
@@ -27,66 +34,76 @@ export async function recordView(
   viewerUserId: string | null,
 ) {
   if (v.isBot) return null;
-  const since = new Date(Date.now() - 30 * 60e3);
-  const recent = await db.viewEvent.findFirst({
-    where: { resourceId: paste.id, visitorHash: v.hash, createdAt: { gte: since } },
-    orderBy: { createdAt: "desc" },
+  const since = new Date(Date.now() - ONE_PER_IP_MS());
+  const { id, created } = await db.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`view:${paste.id}:${v.ipHash}`}))`;
+    const recent = await tx.viewEvent.findFirst({
+      where: { resourceId: paste.id, ipHash: v.ipHash, createdAt: { gte: since } },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    if (recent) return { id: recent.id, created: false };
+    const ev = await tx.viewEvent.create({
+      data: {
+        kind: "PASTE",
+        resourceId: paste.id,
+        ownerId: paste.userId,
+        visitorHash: v.hash,
+        ipHash: v.ipHash,
+        country: v.country,
+        device: v.device,
+        browser: v.browser,
+        source: ref.source,
+        referrerDomain: ref.domain,
+      },
+      select: { id: true },
+    });
+    return { id: ev.id, created: true };
   });
-  if (recent) return recent.id;
-  const ev = await db.viewEvent.create({
-    data: {
-      kind: "PASTE",
-      resourceId: paste.id,
-      ownerId: paste.userId,
-      visitorHash: v.hash,
-      country: v.country,
-      device: v.device,
-      browser: v.browser,
-      source: ref.source,
-      referrerDomain: ref.domain,
-    },
-  });
-  if (!viewerUserId || viewerUserId !== paste.userId) {
+  if (created && (!viewerUserId || viewerUserId !== paste.userId)) {
     await db.paste.update({ where: { id: paste.id }, data: { views: { increment: 1 } } });
   }
-  return ev.id;
+  return id;
 }
 
 /**
  * Earning pastes open straight away and pay per unique view. Called by the view beacon
  * once the visitor has had the page open for a few seconds and passed the silent check.
- * Marks the view as paid ("unlocked" in the data model) and credits the creator and referrer.
+ * Pays at most once per IP per paste in any 24 hours, enforced under the same lock as
+ * recordView, and credits the creator and referrer.
  */
 export async function creditPasteView(pasteId: string, viewEventId: string, v: VisitorInfo, viewerUserId: string | null) {
   const p = await db.paste.findUnique({ where: { id: pasteId }, select: { userId: true, earning: true, status: true } });
   if (!p?.userId || !p.earning || p.status !== "ACTIVE" || v.isBot || viewerUserId === p.userId) return { credited: false };
 
-  const since = new Date(Date.now() - EARN.uniqueWindowHours * 3600e3);
-  const already = await db.viewEvent.findFirst({
-    where: { resourceId: pasteId, visitorHash: v.hash, unlocked: true, createdAt: { gte: since } },
-    select: { id: true },
-  });
-  if (already) return { credited: false };
-
   const owner = await db.user.findUnique({ where: { id: p.userId } });
   const earning = owner?.status === "ACTIVE" ? earningMicrosFor(v.country) : 0n;
+  const since = new Date(Date.now() - ONE_PER_IP_MS());
 
-  // Only one request can turn this view event into a paid view.
-  const marked = await db.viewEvent.updateMany({
-    where: { id: viewEventId, resourceId: pasteId, unlocked: false },
-    data: { unlocked: true, unlockedAt: new Date(), earningMicros: earning },
-  });
-  if (marked.count === 0) return { credited: false };
-  await db.paste.update({ where: { id: pasteId }, data: { unlocks: { increment: 1 } } });
-
-  if (earning > 0n && owner) {
-    await db.ledgerEntry.create({ data: { userId: owner.id, type: "EARNING", amountMicros: earning, refId: viewEventId, note: v.country } });
-    if (owner.referredById) {
-      const bonus = BigInt(Math.floor(Number(earning) * EARN.referralRate));
-      if (bonus > 0n) await db.ledgerEntry.create({ data: { userId: owner.referredById, type: "REFERRAL", amountMicros: bonus, refId: owner.id } });
+  const paid = await db.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`view:${pasteId}:${v.ipHash}`}))`;
+    const already = await tx.viewEvent.findFirst({
+      where: { resourceId: pasteId, ipHash: v.ipHash, unlocked: true, createdAt: { gte: since } },
+      select: { id: true },
+    });
+    if (already) return false;
+    // The event must belong to this IP, so one visitor can't spend another's view.
+    const marked = await tx.viewEvent.updateMany({
+      where: { id: viewEventId, resourceId: pasteId, ipHash: v.ipHash, unlocked: false },
+      data: { unlocked: true, unlockedAt: new Date(), earningMicros: earning },
+    });
+    if (marked.count === 0) return false;
+    await tx.paste.update({ where: { id: pasteId }, data: { unlocks: { increment: 1 } } });
+    if (earning > 0n && owner) {
+      await tx.ledgerEntry.create({ data: { userId: owner.id, type: "EARNING", amountMicros: earning, refId: viewEventId, note: v.country } });
+      if (owner.referredById) {
+        const bonus = BigInt(Math.floor(Number(earning) * EARN.referralRate));
+        if (bonus > 0n) await tx.ledgerEntry.create({ data: { userId: owner.referredById, type: "REFERRAL", amountMicros: bonus, refId: owner.id } });
+      }
     }
-  }
-  return { credited: earning > 0n };
+    return true;
+  });
+  return { credited: paid && earning > 0n };
 }
 
 /** Signed token rendered into an earning paste page; the view beacon must return it after a minimum time. */
