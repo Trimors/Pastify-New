@@ -167,7 +167,7 @@ export default async function Home() {
               ["Public rates", "CPM for every country, on a public page. No guessing."],
               ["Clear payouts", `$${EARN.payoutMinimumUsd} minimum. PayPal or crypto. Every request and status in your dashboard.`],
               ["No waiting", "Pastes open straight away. No steps, no countdowns."],
-              ["Real views only", "Server-checked views, bot filtering and one count per visitor per day."],
+              ["Real views only", "Server-checked views, bot filtering and one count per IP address per paste every 24 hours."],
               ["A real editor", "Rich text or code, templates, clone from other pastebins, expiry, passwords, folders."],
               ["Your data, your way", "Raw and download on every paste, a documented API, and two-factor sign-in."],
             ].map(([t, d]) => (

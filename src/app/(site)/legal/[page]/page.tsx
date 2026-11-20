@@ -23,7 +23,7 @@ const PAGES: Record<string, { title: string; body: [string, string][] }> = {
   privacy: {
     title: "Privacy Policy",
     body: [
-      ["What we collect", "Account: email, username, password hash, payout details. Visitors: country (from IP), device type, browser and referring site. We store a daily-rotating hash of IP and browser to count unique visits, never the raw IP for visitors."],
+      ["What we collect", "Account: email, username, password hash, payout details. Visitors: country (from IP), device type, browser and referring site. To count one view per IP address per paste every 24 hours, we store a one-way keyed hash of the visitor's IP address (for IPv6, of its /64 network block), never the raw IP."],
       ["Why", "To run the service, count views and unlocks fairly, stop fraud, and pay creators."],
       ["Sharing", "We share data only with the providers that run the service (hosting, payments, ad and offer partners) and when the law requires it. We don't sell personal data."],
       ["Cookies", "A session cookie keeps you signed in. Short-lived cookies remember which items you've unlocked. Sponsors shown during unlocks may set their own cookies."],
